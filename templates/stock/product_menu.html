@@ -1,0 +1,44 @@
+
+
+<div class="col-lg-3">
+    <h3 class="text-center alert alert-info">Items Menu</h3>
+    <div class="list-group">
+
+      <h4 class="bg-primary bg-gradient alert-info rounded  p-3 "><a class="text-light" href="/product/" class="list-group-item">All Items</a></h4>
+      {% if not prod %}
+      {% for category in categories %}
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="?category={{category.id}}" class="list-group-item">{{category.name}}</a></h4>
+      {% endfor %}
+      {% endif %}
+
+      
+      {% if category_selected %}
+
+      {% for category in categories %}
+      {% if perms.home.add_product %}
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light" href="/add_product?category={{category.id}}" class="list-group-item">Add Item</a></h4>  
+      <h4 class="bg-primary bg-gradient rounded p-3">
+        <a class="text-light" href="{% url 'addproductprice' category.id %}" class="list-group-item">
+          Add Item Price
+        </a>
+      </h4>
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="{% url 'searchproductprice' category.id %}" class="list-group-item">Search Items Price</a></h4>
+      {% endif %}
+      {% endfor %}
+    
+      {% elif add_category or category_selected == False %}
+      {% if perms.home.add_category %}
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light" href="/category/" class="list-group-item">Add Category</a></h4>
+      {% endif %}
+      {% endif %}
+
+      {% if prod %}
+
+      {% for category in categories %}
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="/product?category={{category.id}}" class="list-group-item">{{category.name}}</a></h4>
+      
+      {% endfor %}
+      {% endif %}
+ 
+    </div>
+  </div>

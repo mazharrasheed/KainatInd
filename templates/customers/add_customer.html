@@ -1,0 +1,178 @@
+{% extends 'css-js-links.html' %} 
+{% load crispy_forms_tags %}
+{% load custom_filters %}
+
+{% block title %}
+Add Customer {% endblock title %} 
+
+{% block context %}
+{% if request.user.is_superuser %}
+{% include 'navbar.html' %} 
+{% else %}
+{% include 'accounts/navbar.html' %} 
+{% endif %}
+{% endblock context %}
+
+{% block body %}
+<div class="pcoded-content">
+  <div class="pcoded-inner-content">
+    <div class="main-body">
+      <div class="page-wrapper">
+        <div class="page-body">
+
+<div class="row">
+
+    <div class="col-md-4 offset-md-4   ">
+      <h2 class="text-center  alert alert-info">Add Customer</h2>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{form|crispy}}
+
+        <input type="submit" class="btn btn-success" {% if update %} value="Update Customer" {% else %} value="Add Customer" {%endif %}>
+        <a href= "/customers/" class="btn btn-warning" >Customer</a>
+      </form>
+
+    </div>
+    </div>
+
+
+
+    <div class="col-12 mt-3 ">
+      <h2 class="text-center alert alert-info">Customers List</h2>
+      <div class="card py">
+        <div class="table-responsive py-2">
+      {% if mydata %}
+      <table class="table table-stripped table-bordered" id="petrol-table">
+        <colgroup>
+          <col width="10%">
+          <col width="15%">    
+          <col width="15%">    
+          <col width="15%">    
+          <col width="15%">    
+          
+          {% if perms.home.change_customer or perms.home.change_customer %}
+          {% if update %} {% else %}<col width="25%"> {% endif %}
+          {% endif %}
+
+      </colgroup>
+        <thead>
+          <tr class="bg-primary bg-gradient text-light text-center fs-5">
+            <td class="text-center fs-5" >Sr.No.</td>
+            <td class="text-center fs-5" >Company Name</td>
+            <td class="text-center fs-5" >Owner Name</td>
+            <td class="text-center fs-5" >Contact</td>
+            <td class="text-center fs-5" >Adress</td>
+          
+            {% if update %} {% else %}<td class="text-center fs-5" >Action</td> {% endif %}
+            
+            
+          </tr>
+        </thead>
+        <tbody>
+
+          {% if update %}
+          <tr>
+            <td class="text-center fs-5" >{{mydata.id}}</td>
+            <td class="text-center fs-5">{{mydata.coname|capitalize_after_space}}</td>
+            <td class="text-center fs-5">{{mydata.name|capitalize_after_space}}</td>
+            <td class="text-center fs-5">{{mydata.contact}}</td>
+            <td class="text-center fs-5">{{mydata.adress|title}}</td>
+
+          </tr>
+          {% else %}
+          {% for data in mydata %}
+          <tr  id="customer-{{ data.id }}">
+            <td class="text-center fs-5" >{{forloop.counter}}</td>
+            <td class="text-center fs-5">{{data.coname|capitalize_after_space}}</td>
+            <td class="text-center fs-5">{{data.name|capitalize_after_space}}</td>
+            <td class="text-center fs-5">{{data.contact}}</td>
+            <td class="text-center fs-5">{{data.adress|capitalize_after_space}}</td>
+         
+            <td  class="text-center fs-5">
+              {% if perms.home.change_customer %}
+              <a class="btn fs-6 btn-warning" href={% url 'editcustomer' id=data.id %}>Edit</a>
+              {% else %}
+                <p>No edit permission </p>
+                {% endif%}
+              {% if perms.home.delete_customer %}
+              <button class="btn btn-danger delete-customer fs-6" data-customer-id="{{ data.id }}">
+                Delete
+              </button>
+              {% else %}
+              <p>No delete permission </p>
+              {% endif%}
+              
+            </td>
+          </tr>
+          {% endfor %} 
+          {% endif %}
+        </tbody>
+      </table>
+      {% else %}
+      <h4 class="text-center alert alert-warning">No Record Found</h4>
+      {% endif %}
+    </div>
+    </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function () {
+    // Handle the delete button click
+    $(".delete-customer").on("click", function (event) {
+      event.preventDefault();
+
+      var customerId = $(this).data("customer-id");
+      var url = "{% url 'deletecustomer' 0 %}".replace("0",customerId);
+
+      if (confirm("Are you sure you want to delete this customer?")) {
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          },
+          success: function (response) {
+            if (response.success) {
+              // Remove the gate pass row from the table
+              $("#customer-" + customerId).remove();
+              $("#display-msg").html(
+                `<h5 id= 'msg' class='alert alert-success'> ${response.message} </h5> `
+              );
+
+              // alert(response.message);
+            } else {
+              alert("Failed to delete the custmer.");
+              $("#display-msg").html(
+                `<h5 id= 'msg' class='alert alert-warning'> ${response.message} </h5> `
+              );
+            }
+          },
+          error: function () {
+            alert("An error occurred. Please try again.");
+          },
+        });
+      }
+    });
+  });
+</script>
+
+
+<script>
+  $(document).ready(function(){
+
+    // Wait for 4 seconds and then hide the element with id "msg"
+    setTimeout(function(){
+        $("#msg").hide();
+    }, 4000); // 10000 milliseconds = 10 seconds
+});
+   
+</script>
+  
+{% endblock body %}

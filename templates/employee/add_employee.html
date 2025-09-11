@@ -1,0 +1,122 @@
+{% extends 'css-js-links.html' %}
+{% load crispy_forms_tags %}
+{% load custom_filters %}
+
+{% block title %}
+Add Employee {% endblock title %}
+
+{% block context %}
+{% if request.user.is_superuser %}
+{% include 'navbar.html' %} 
+{% else %}
+{% include 'accounts/navbar.html' %} 
+{% endif %}
+{% endblock context %}
+
+{% block body %}
+<div class="pcoded-content">
+  <div class="pcoded-inner-content">
+    <div class="main-body">
+      <div class="page-wrapper">
+        <div class="page-body">
+
+          <div class="row">
+          
+            <div class="col-md-4 offset-md-4 ">
+              <h2 class="text-center alert alert-info">Add Employee</h2>
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{form|crispy}}
+
+                <input type="submit" class="btn btn-success" {% if update %} value="Update Employee" {% else %}
+                  value="Add Employee" {%endif %}>
+                <a href="/employees/" class="btn btn-warning">Employee</a>
+              </form>
+
+            </div>
+
+          </div>
+          <div class="col-12 mt-3 ">
+            <h2 class="text-center alert alert-info">Employees List</h2>
+            <div class="card py">
+              <div class="table-responsive py-2">
+            {% if mydata %}
+            <table class="table table-stripped table-bordered" id="petrol-table">
+              <colgroup>
+                <col width="10%">
+                <col width="15%">
+                <col width="15%">
+                <col width="15%">
+
+                <col width="15%">
+                {% if update %} {% else %}
+                <col width="25%"> {% endif %}
+              </colgroup>
+              <thead>
+                <tr class="bg-primary bg-gradient text-light text-center fs-5">
+                  <td class="text-center fs-5 ">Sr.No.</td>
+                  <td class="text-center fs-5 ">Name</td>
+                  <td class="text-center fs-5 ">Description</td>
+                  <td class="text-center fs-5 ">Contact</td>
+                  <td class="text-center fs-5 ">Adress</td>
+
+                  {% if update %} {% else %}<td class="text-center fs-5">Action</td> {% endif %}
+
+                </tr>
+              </thead>
+              <tbody>
+
+                {% if update %}
+                <tr>
+                  <td class="text-center fs-5">{{mydata.id}}</td>
+                  <td class="text-center fs-5">{{mydata.name}}</td>
+                  <td class="text-center fs-5">{{mydata.job}}</td>
+                  <td class="text-center fs-5">{{mydata.contact}}</td>
+                  <td class="text-center fs-5">{{mydata.adress}}</td>
+                </tr>
+                {% else %}
+                {% for data in mydata %}
+                <tr>
+                  <td class="text-center fs-5">{{forloop.counter}}</td>
+
+                  <td class="text-center fs-5">{{data.name|capitalize_after_space}}</td>
+                  <td class="text-center fs-5">{{data.job|title}}</td>
+                  <td class="text-center fs-5">{{data.contact}}</td>
+                  <td class="text-center fs-5">{{data.adress|title}}</td>
+                  <td class="text-center fs-5">
+                    {% if perms.home.change_employee %}
+                    <a class="btn btn-sm btn-warning fs-5" href={% url 'editemployee' id=data.id %}>Edit</a>
+                    {% endif %}
+                    {% if perms.home.delete_employee %}
+                    <a class=" btn btn-sm btn-danger fs-5" href={% url 'deleteemployee' id=data.id %}>Delete</a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+            {% else %}
+            <h4 class="text-center alert alert-warning">No Record Found</h4>
+            {% endif %}
+          </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+
+    // Wait for 4 seconds and then hide the element with id "msg"
+    setTimeout(function () {
+      $("#msg").hide();
+    }, 4000); // 10000 milliseconds = 10 seconds
+  });
+
+</script>
+
+{% endblock body %}

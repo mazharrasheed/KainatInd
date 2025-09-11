@@ -1,0 +1,115 @@
+{% extends 'css-js-links.html' %} 
+{% load crispy_forms_tags %}
+{% load custom_filters %}
+
+{% block title %}
+Gatepas {% endblock title %} 
+
+{% block context %}
+{% if request.user.is_superuser %}
+{% include 'navbar.html' %} 
+{% else %}
+{% include 'store/navbar.html' %} 
+{% endif %}
+{% endblock context %}
+
+{% block body %}
+<div class="pcoded-content">
+  <div class="pcoded-inner-content">
+    <div class="main-body">
+      <div class="page-wrapper">
+        <div class="page-body">
+          <div class="row">
+    {% include 'stock/product_menu.html' %}
+    <div class="col-md-5 offset-md-2 ">
+      <h3 class="text-center alert alert-info">Add Product</h3>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{form|crispy}}
+        <!-- <div class="form-group">
+          <label class="fs-5" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+          {{ form.category }}
+        </div> -->
+
+        <input type="submit" class="btn btn-success" {% if update %} value="Update Product" {% else %}
+          value="Add Product" {%endif %}>
+        <a href="/product/" class="btn btn-warning">Products</a>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="col-md-12 text-center mt-5">
+    <h3 class="text-center alert alert-info">Products List</h3>
+    <div class="card py">
+      <div class="table-responsive py-2">
+    {% if mydata %}
+    <table class="table table-stripped table-bordered" id="petrol-table">
+      <colgroup>
+        <col width="5%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+        <col width="15%">
+      
+      </colgroup>
+      <thead>
+        <tr class="bg-primary bg-gradient text-light text-center">
+          <td class="text-center fs-5">Sr.No.</td>
+          <td class="text-center fs-5">Category</td>
+          <td class="text-center fs-5">Name</td>
+          <td class="text-center fs-5">Size</td>
+          <td class="text-center fs-5">Quantity</td>
+          <td class="text-center fs-5">Product Status</td>
+         
+        </tr>
+      </thead>
+      <tbody>
+
+        {% if update %}
+        <tr>
+          <td class="text-center">{{mydata.id}}</td>
+          <td class="text-center">{{mydata.category}}</td>
+          <td class="">{{mydata.productname|capitalize_after_space}}</td>
+          <td class="text-center">{{mydata.product_size}}</td>
+          <td class="text-center">{{mydata.product_quantity}}</td>
+          <td class="text-center">{% if mydata.product_status %} Active {% else %} Inactive {% endif %} </td>
+        </tr>
+        {% else %}
+        {% for data in mydata %}
+        <tr>
+          <td class="text-center fs-5">{{forloop.counter}}</td>
+          <td class="text-center fs-5">{{data.category}}</td>
+          <td class=" fs-5">{{data.productname|capitalize_after_space}}</td>
+          <td class="text-center fs-5">{{data.product_size}}</td>
+          <td class="text-center fs-5"> {% if data.product_quantity %}
+
+            {{data.product_quantity}} {% else %} - {% endif %} </td>
+          <td class="text-center fs-5">{% if data.product_status %} Active {% else %} Inactive {% endif %} </td>
+
+         
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+    {% else %}
+    <h4 class="text-center alert alert-warning">No Record Found</h4>
+    {% endif %}
+  </div>
+  </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+
+    // Wait for 4 seconds and then hide the element with id "msg"
+    setTimeout(function () {
+      $("#msg").hide();
+    }, 4000); // 10000 milliseconds = 10 seconds
+  });
+
+</script>
+
+{% endblock body %}

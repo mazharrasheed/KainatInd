@@ -1,0 +1,65 @@
+{% extends 'css-js-links.html' %}
+{% load custom_filters %}
+
+{% block title %}
+Products {% endblock title %}
+
+{% block context %}
+{% if request.user.is_superuser %}
+{% include 'navbar.html' %} 
+{% else %}
+{% include 'store/navbar.html' %} 
+{% endif %}
+{% endblock context %}
+
+{% block body %}
+
+<div class="pcoded-content">
+  <div class="pcoded-inner-content">
+    <div class="main-body">
+      <div class="page-wrapper">
+        <div class="page-body">
+          <div class="row">
+            {% include 'stock/product_menu.html' %}
+            <div id="product" class="col-lg-9">
+              <h3 class="text-center alert alert-info">Items List</h3>
+              <div class="row">
+                {% if products %}
+                {% for product in products %}
+                <div class="col-lg-6 col-md-6 mb-3">
+                  <div class="card mx-auto p-3" id="{{product.id}}" style="width: 25rem">
+                    {% if product.pro_img %}
+                    <img src="{{product.pro_img.url}}" class="card-img-top mt-2" alt="Product Image">
+                    {% endif %}
+                    <div class="card-body p-0">
+                      <h5 class="card-title mt-2">Name: {{product.productname|title}}</h5>
+                      <p class="card-text">Sizes: {{product.product_size}}</p>
+                      <p class="card-text">In Stock: {{product.get_current_stock}}</p>
+                      <p class="card-text">Status: {% if product.product_status %} Active 
+                        {% else %}
+                        In Active
+                      {% endif %}</p>
+                      {% if perms.home.change_product %}
+                      <a class="btn btn-sm btn-warning fs-5" href={% url 'editproduct' id=product.id %}>Edit</a>
+                      {% endif %}
+                      {% if perms.home.delete_product %}
+                      <a class=" btn btn-sm btn-danger fs-5" href={% url 'deleteproduct' id=product.id %}>Delete</a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <h4 class="text-center fs-5 alert alert-warning">No Record Found</h4>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock body %}
