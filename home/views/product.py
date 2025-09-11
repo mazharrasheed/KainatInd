@@ -27,6 +27,7 @@ def products(request):
     else:
         categories=Category.objects.filter(is_deleted=False)
         products=Product.objects.filter(is_deleted=False).order_by('category')
+        messages.success(request,"Items Loaded successfully !!")
     data={'products':products,'categories':categories,'category_selected':category_selected}
     return render(request,"stock/products_home.html",data)   
 
@@ -36,8 +37,11 @@ def add_product(request,id=''):
   if id:
     categories=Category.objects.filter(is_deleted=False,id=id)
   else:
+
     categoryID=int((request.GET.get('category')))
     categories=Category.objects.filter(is_deleted=False,id=categoryID)
+
+    
   if request.method == 'POST':
       mydata=Product.objects.filter(is_deleted=False)
       form = ProductForm(request.POST,request.FILES)
@@ -57,6 +61,22 @@ def add_product(request,id=''):
       mydata=Product.objects.filter(is_deleted=False,category=cat).order_by("-id")
       form = ProductForm(initial={'category': cat})
   data={'form': form, 'mydata':mydata,'categories':categories,'prod':True}
+  return render(request, 'stock/add_product.html', data)
+
+@login_required
+# @permission_required('home.add_sales_product', login_url='/login/')
+def add_product1(request):
+  if request.method == 'POST':
+      mydata=Product.objects.filter(is_deleted=False)
+      form = ProductForm(request.POST,request.FILES)
+      if form.is_valid():
+        form.save()
+        messages.success(request,"Product Added successfully !!")
+        return redirect('addproduct2')
+  else:
+      mydata=Product.objects.filter(is_deleted=False).order_by("-id")
+      form = ProductForm()
+  data={'form': form, 'mydata':mydata,'prod':True}
   return render(request, 'stock/add_product.html', data)
 
 @login_required
