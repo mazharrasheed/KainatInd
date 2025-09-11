@@ -1,6 +1,6 @@
 {% extends 'css-js-links.html' %}
 {% load custom_filters %}
-
+{% load crispy_forms_tags %}
 {% block title %}
 Products {% endblock title %}
 
@@ -21,12 +21,15 @@ Products {% endblock title %}
         <div class="page-body">
           <div class="row">
             {% include 'stock/product_menu.html' %}
-            <div id="product" class="col-lg-9">
-              <h3 class="text-center alert alert-info">Items List</h3>
-              <div class="row">
+
+            <!-- Trigger button -->
+
+            <div id="product" class="col-md-12">
+              <h3 class="">Items List</h3>
+              <div class="row mt-5">
                 {% if products %}
                 {% for product in products %}
-                <div class="col-lg-6 col-md-6 mb-3">
+                <div class=" col-md-4 mb-3 p-5">
                   <div class="card mx-auto p-3" id="{{product.id}}" style="width: 25rem">
                     {% if product.pro_img %}
                     <img src="{{product.pro_img.url}}" class="card-img-top mt-2" alt="Product Image">
@@ -40,10 +43,10 @@ Products {% endblock title %}
                         In Active
                       {% endif %}</p>
                       {% if perms.home.change_product %}
-                      <a class="btn btn-sm btn-warning fs-5" href={% url 'editproduct' id=product.id %}>Edit</a>
+                      <a class="btn btn-sm btn-warning fs-5 text-light" href={% url 'editproduct' id=product.id %}><i class="ti-pencil-alt"></i>Edit</a>
                       {% endif %}
                       {% if perms.home.delete_product %}
-                      <a class=" btn btn-sm btn-danger fs-5" href={% url 'deleteproduct' id=product.id %}>Delete</a>
+                      <a class=" btn btn-sm btn-danger fs-5" href={% url 'deleteproduct' id=product.id %}><i class="ti-trash"></i>Delete</a>
                       {% endif %}
                     </div>
                   </div>
@@ -57,6 +60,34 @@ Products {% endblock title %}
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ form|crispy }}
+
+          <div class="mt-3">
+            <input type="submit" class="btn btn-success" {% if update %} value="Update Category" {% else %} value="Add Category" {% endif %}>
+            <a href="/product/" class="btn btn-warning">Products</a>
+          </div>
+        </form>
+      </div>
+
     </div>
   </div>
 </div>

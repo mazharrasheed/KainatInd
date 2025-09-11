@@ -23,8 +23,9 @@ Searech Products Price {% endblock title %}
                     <div class="row">
 
                         {% include 'stock/product_menu.html' %}
-                        <div class="col-md-5 ">
-                            <h3 class="text-center alert alert-info">Search Product Price</h3>
+                        <h3 class="">Search Product Price</h3>
+                        <div class="col-md-4 offset-md-2 ">
+                            
                             <form method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 {{form|crispy}}
@@ -37,8 +38,8 @@ Searech Products Price {% endblock title %}
                         </div>
                     </div>
 
-                    <div class="col-12 text-center mt-5">
-                        <h3 class="text-center alert alert-info">Products List</h3>
+                    <div class="col-md-12 text-center mt-5">
+                        <h3 class="">Products List</h3>
                         <div class="card py">
                             <div class="table-responsive py-2">
                         {% if mydata %}

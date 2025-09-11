@@ -12,8 +12,6 @@ Gatepas {% endblock title %}
 {% endif %}
 {% endblock context %}
 
-
-
 {% block body %}
 
 <div class="pcoded-content">
@@ -23,19 +21,29 @@ Gatepas {% endblock title %}
         <div class="page-body">
   <div class="row">
  
-    <div class="col-md-3 ">
-      <h2 class="text-center alert alert-info">Add Category</h2>
+    <div class="col-md-3 offset-md-2 ">
+      <h2 class="">Add Category</h2>
       <form method="post">
         {% csrf_token %}
         {{form|crispy}}
 
-        <input type="submit" class="btn btn-success" {% if update %} value="Update Category" {% else %} value="Add Category" {%endif %}>
-        <a href= "/product/" class="btn btn-warning" >Products</a>
+        <button type="submit" class="btn btn-success text-light">
+                                    {% if update %}
+                                    <i class="ti-pencil-alt"></i> Category
+                                    {% else %}
+                                    <i class="ti-plus"></i> Category
+                                    {% endif %}
+                                </button>
+
+
+        <a href= "/product/" class="btn btn-info text-light" >Items</a>
       </form>
   
     </div>
-    <div class="col-md-9  ">
-      <h2 class="text-center alert alert-info">Categories</h2>
+    </div>
+  <div class="row mt-5">
+    <div class="col-md-12  ">
+      <h2 class="">Categories List</h2>
       <div class="card py">
         <div class="table-responsive py-2">
       {% if mydata %}
@@ -67,10 +75,10 @@ Gatepas {% endblock title %}
             <td class="text-center fs-5">{{data.name}}</td>
             {% if perms.home.change_blog %}
             <td  class="text-center fs-5">
-              <a class="btn btn-sm btn-warning fs-5" href={% url 'editcategory' id=data.id %}>Edit</a>
+              <a class="btn btn-sm btn-warning fs-5 text-light" href={% url 'editcategory' id=data.id %}><i class="ti-pencil-alt"></i>Edit</a>
               {% endif %}
               {% if perms.home.delete_tank %}
-              <a class=" btn btn-sm btn-danger fs-5" href={% url 'deletecategory' id=data.id %}>Delete</a>
+              <a class=" btn btn-sm btn-danger fs-5" href={% url 'deletecategory' id=data.id %}><i class="ti-trash"></i>Delete</a>
               {% endif %}
             </td>
           </tr>
@@ -85,6 +93,7 @@ Gatepas {% endblock title %}
     </div>
     </div>
   </div>
+</div>
 </div>
 
   <script>

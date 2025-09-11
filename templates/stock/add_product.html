@@ -1,15 +1,15 @@
-{% extends 'css-js-links.html' %} 
+{% extends 'css-js-links.html' %}
 {% load crispy_forms_tags %}
 {% load custom_filters %}
 
 {% block title %}
-Gatepas {% endblock title %} 
+Gatepas {% endblock title %}
 
 {% block context %}
 {% if request.user.is_superuser %}
-{% include 'navbar.html' %} 
+{% include 'navbar.html' %}
 {% else %}
-{% include 'store/navbar.html' %} 
+{% include 'store/navbar.html' %}
 {% endif %}
 {% endblock context %}
 
@@ -19,88 +19,47 @@ Gatepas {% endblock title %}
     <div class="main-body">
       <div class="page-wrapper">
         <div class="page-body">
+          {% include 'stock/product_menu.html' %}
           <div class="row">
-    {% include 'stock/product_menu.html' %}
-    <div class="col-md-5 offset-md-2 ">
-      <h3 class="text-center alert alert-info">Add Product</h3>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{form|crispy}}
-        <!-- <div class="form-group">
-          <label class="fs-5" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
-          {{ form.category }}
-        </div> -->
+            <div class="col-md-12">
 
-        <input type="submit" class="btn btn-success" {% if update %} value="Update Product" {% else %}
-          value="Add Product" {%endif %}>
-        <a href="/product/" class="btn btn-warning">Products</a>
-      </form>
+              <div class=" ">
+                <h3 class="">Add Items</h3>
+                <form method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="row">
+                    {% for field in form %}
+                    <div class="col-md-3 mb-5">
+                      {{ field.label_tag }}
+                      {{ field }}
+                      {% if field.errors %}
+                      <div class="text-danger">{{ field.errors }}</div>
+                      {% endif %}
+                    </div>
+                    {% endfor %}
+                  </div>
 
+                  
+                     <button type="submit" class="btn btn-success text-light">
+                                    {% if update %}
+                                    <i class="ti-pencil-alt"></i> Item
+                                    {% else %}
+                                    <i class="ti-plus"></i> Item
+                                    {% endif %}
+                                </button>
+
+
+                  <a href="/product/" class="btn btn-warning text-light">Items</a>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="col-md-12 text-center mt-5">
-    <h3 class="text-center alert alert-info">Products List</h3>
-    <div class="card py">
-      <div class="table-responsive py-2">
-    {% if mydata %}
-    <table class="table table-stripped table-bordered" id="petrol-table">
-      <colgroup>
-        <col width="5%">
-        <col width="15%">
-        <col width="15%">
-        <col width="15%">
-        <col width="15%">
-        <col width="15%">
-      
-      </colgroup>
-      <thead>
-        <tr class="bg-primary bg-gradient text-light text-center">
-          <td class="text-center fs-5">Sr.No.</td>
-          <td class="text-center fs-5">Category</td>
-          <td class="text-center fs-5">Name</td>
-          <td class="text-center fs-5">Size</td>
-          <td class="text-center fs-5">Quantity</td>
-          <td class="text-center fs-5">Product Status</td>
-         
-        </tr>
-      </thead>
-      <tbody>
-
-        {% if update %}
-        <tr>
-          <td class="text-center">{{mydata.id}}</td>
-          <td class="text-center">{{mydata.category}}</td>
-          <td class="">{{mydata.productname|capitalize_after_space}}</td>
-          <td class="text-center">{{mydata.product_size}}</td>
-          <td class="text-center">{{mydata.product_quantity}}</td>
-          <td class="text-center">{% if mydata.product_status %} Active {% else %} Inactive {% endif %} </td>
-        </tr>
-        {% else %}
-        {% for data in mydata %}
-        <tr>
-          <td class="text-center fs-5">{{forloop.counter}}</td>
-          <td class="text-center fs-5">{{data.category}}</td>
-          <td class=" fs-5">{{data.productname|capitalize_after_space}}</td>
-          <td class="text-center fs-5">{{data.product_size}}</td>
-          <td class="text-center fs-5"> {% if data.product_quantity %}
-
-            {{data.product_quantity}} {% else %} - {% endif %} </td>
-          <td class="text-center fs-5">{% if data.product_status %} Active {% else %} Inactive {% endif %} </td>
-
-         
-        </tr>
-        {% endfor %}
-        {% endif %}
-      </tbody>
-    </table>
-    {% else %}
-    <h4 class="text-center alert alert-warning">No Record Found</h4>
-    {% endif %}
-  </div>
-  </div>
-  </div>
 </div>
+
 <script>
   $(document).ready(function () {
 

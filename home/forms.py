@@ -16,7 +16,7 @@ from crispy_forms.layout import Submit
 from .models import Category,Product,Account,Transaction,GatePassProduct,GatePass,Unit,Sales_Receipt,Inventory
 from .models import Customer,Sales_Receipt_Product,Suppliers,Cheque,Employee,Product_Price,Project,Final_Product
 from .models import Store_Issue_Note,Store_Issue_Product,Store_Purchase_Note,Store_Purchase_Product,Finish_Product_Category
-from .models import Store_Issue_Request,Store_Issue_Request_Product
+from .models import Store_Issue_Request,Store_Issue_Request_Product,Region
 
 
 class Create_User_Form(UserCreationForm):
@@ -48,6 +48,12 @@ class Create_User_Form(UserCreationForm):
             Submit('submit', 'Create User', css_class='btn btn-info mt-3'), 
         )
 
+
+class RegionForm(forms.ModelForm):
+    
+    class Meta:
+        model = Region
+        fields = ['name']
 
 class ProjectForm(forms.ModelForm):
     
@@ -109,6 +115,10 @@ class ProductForm(forms.ModelForm):
         widgets = {
 
             'product_weight': forms.TextInput(attrs={'placeholder': 'Enter product weight'}),
+            "stockable": forms.Select(
+                choices=[(True, "Yes"), (False, "No")],
+                attrs={"class": "form-select"}
+            ),
             
         }
 
@@ -134,7 +144,8 @@ class ProductForm(forms.ModelForm):
         self.fields['default_store'].choices = [('', 'Select')] + list(self.fields['default_store'].choices)
 
 class Product_PriceForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
+    product = forms.ModelChoiceField(queryset=Final_Product.objects.filter(is_deleted=False), empty_label="Select Product")
+    region = forms.ModelChoiceField(queryset=Region.objects.filter(is_deleted=False), empty_label="Select Customer")
     customer = forms.ModelChoiceField(queryset=Customer.objects.filter(is_deleted=False), empty_label="Select Customer")
 
     class Meta:

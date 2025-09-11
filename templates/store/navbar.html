@@ -164,6 +164,18 @@
                   </li>
                   {% endif %}
 
+              {% if perms.home.view_product %}
+                  <li class=" {% if request.path == '/product/' %} color-info {% endif %} ">
+                    <a href="/finished_product/">
+                      <span class="pcoded-micon"><i class="ti-view-list-alt"></i><b>D</b></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
+                        <h5>Products</h5>
+                      </span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
               {% if perms.home.view_employee %}
                   <li class=" {% if request.path == '/inventory/' %} color-info {% endif %} ">
                     <a href="/inventory/">

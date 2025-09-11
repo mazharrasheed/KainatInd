@@ -467,6 +467,16 @@
                   <li class=" {% if request.path == '/product/' %} active {% endif %} ">
                     <a href="/product/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
+                      <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Items</span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+                  {% if perms.home.view_product %}
+                  <li class=" {% if request.path == '/finished_product/' %} active {% endif %} ">
+                    <a href="/finished_product/">
+                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Products</span>
                       <span class="pcoded-mcaret"></span>
                     </a>
@@ -671,8 +681,8 @@
 
                   {% if perms.home.view_project %}
                   <li class=" dropdown-item  {% if request.path == '/project/' %} active {% endif %}">
-                    <a href="/project/">
-                      <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Projects</span>
+                    <a href="/region/">
+                      <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Regions</span>
                     </a>
                   </li>
                   {% endif %}

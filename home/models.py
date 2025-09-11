@@ -27,6 +27,13 @@ class CustomPermissions(models.Model):
             # Add more custom permissions here
         ]
 
+class Region(models.Model):
+    name = models.CharField(max_length=100)
+    is_deleted=models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.name
+    
 class Project(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
@@ -109,8 +116,8 @@ class Product(models.Model):
     productname=models.CharField(max_length=255,unique=True)
     unit=models.CharField(max_length=50,choices=UNIT_CHOICES,default=NOS)
     category=models.ForeignKey(Category,on_delete=models.RESTRICT)
-    final_product_group=models.ForeignKey(Final_Product,on_delete=models.RESTRICT,null=True,blank=True)
-    default_store=models.CharField(max_length=50,choices=STORE_TYPE_CHOICES, )
+    final_product_group=models.ForeignKey(Finish_Product_Category,on_delete=models.RESTRICT,null=True,blank=True)
+    default_store=models.CharField(max_length=50,choices=STORE_TYPE_CHOICES, default=STORE1 )
     stockable=models.BooleanField(default=False)
     rate=models.FloatField(default=0,null=True,blank=True)
     labour=models.FloatField(default=0,null=True,blank=True)
@@ -332,7 +339,8 @@ class Cheque(models.Model):
         # return f"{self.customer} {self.cheque_number}".capitalize()
 
 class Product_Price(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.RESTRICT, related_name='product_price')
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='finl_product_price')
+    region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
     customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
     price = models.FloatField()
     is_deleted=models.BooleanField(default=False)

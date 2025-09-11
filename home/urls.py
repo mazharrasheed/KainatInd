@@ -3,6 +3,7 @@ from django.urls import  path
 from home.views import category,product
 from home.views import users,views,accounts,store_issue,store_purchase,finished_product,finished_pro_category
 from home.views import gatepass,sales,suppliers,customers,cheques,employees,prices,project,store_issue_request
+from home.views import regions
 from home.models import Category
 from django.conf.urls.static import static
 
@@ -35,6 +36,11 @@ urlpatterns = [
     path('project/<int:id>', project.edit_project , name="editproject"),
     path('deleteproject/<int:id>', project.delete_project , name="deleteproject"),
 
+# Regions
+    path('region/', regions.add_Region , name="region"),
+    path('region/<int:id>', regions.edit_region , name="editregion"),
+    path('deleteregion/<int:id>',regions.delete_region , name="deleteregion"),
+
 # Product Category
     path('category/', category.add_category , name="category"),
     path('category/<int:id>', category.edit_category , name="editcategory"),
@@ -45,6 +51,7 @@ urlpatterns = [
     path('finished-product-category/<int:id>', finished_pro_category.edit_category , name="edit_finished_product_category"),
     path('finished-product-deletecategory/<int:id>', finished_pro_category.delete_category , name="delete_finished_product_category"),
 
+# Products
     path('store/', product.store , name="store"),
     path('product/', product.products , name="product"),
     path('add_product/<int:id>', product.add_product , name="addproduct1"),
