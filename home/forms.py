@@ -16,7 +16,7 @@ from crispy_forms.layout import Submit
 from .models import Category,Product,Account,Transaction,GatePassProduct,GatePass,Unit,Sales_Receipt,Inventory
 from .models import Customer,Sales_Receipt_Product,Suppliers,Cheque,Employee,Product_Price,Project,Final_Product
 from .models import Store_Issue_Note,Store_Issue_Product,Store_Purchase_Note,Store_Purchase_Product,Finish_Product_Category
-from .models import Store_Issue_Request,Store_Issue_Request_Product,Region
+from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price
 
 
 class Create_User_Form(UserCreationForm):
@@ -144,8 +144,7 @@ class ProductForm(forms.ModelForm):
         self.fields['default_store'].choices = [('', 'Select')] + list(self.fields['default_store'].choices)
 
 class Product_PriceForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Final_Product.objects.filter(is_deleted=False), empty_label="Select Product")
-    region = forms.ModelChoiceField(queryset=Region.objects.filter(is_deleted=False), empty_label="Select Customer")
+    product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
     customer = forms.ModelChoiceField(queryset=Customer.objects.filter(is_deleted=False), empty_label="Select Customer")
 
     class Meta:
@@ -166,6 +165,73 @@ class Product_PriceForm(forms.ModelForm):
 
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+class Final_Product_PriceForm(forms.ModelForm):
+    product = forms.ModelChoiceField(
+        queryset=Final_Product.objects.filter(is_deleted=False),
+        empty_label="Select Final Product"
+    )
+    customer = forms.ModelChoiceField(
+        queryset=Customer.objects.filter(is_deleted=False),
+        empty_label="Select Customer",
+        required=False
+    )
+    region = forms.ModelChoiceField(
+        queryset=Region.objects.filter(is_deleted=False),
+        empty_label="Select Region",
+        required=False
+    )
+
+    class Meta:
+        model = Final_Product_Price
+        fields = ['product', 'region', 'customer', 'price']
+
+    def __init__(self, *args, **kwargs):
+        category = kwargs.pop('category', None)
+        super(Final_Product_PriceForm, self).__init__(*args, **kwargs)
+
+        # Filter products by category if provided
+        if category:
+            self.fields['product'].queryset = Final_Product.objects.filter(
+                category_id=category.id if hasattr(category, "id") else category,
+                is_deleted=False
+            )
+
+        placeholders = {
+            'price': 'Enter final product price',
+        }
+        for field_name, placeholder in placeholders.items():
+            if field_name in self.fields:
+                self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        product = cleaned_data.get("product")
+        customer = cleaned_data.get("customer")
+        region = cleaned_data.get("region")
+
+        # Rule 1: At least one must be provided
+        if not customer and not region:
+            raise forms.ValidationError("Either a Region or a Customer must be selected.")
+
+        # Rule 2: Prevent duplicate for same product + customer
+        if customer and Final_Product_Price.objects.filter(
+            product=product, customer=customer, is_deleted=False
+        ).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(
+                f"A price already exists for product '{product}' and customer '{customer}'."
+            )
+
+        # Rule 3: Prevent duplicate for same product + region
+        if region and Final_Product_Price.objects.filter(
+            product=product, region=region, is_deleted=False
+        ).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(
+                f"A price already exists for product '{product}' and region '{region}'."
+            )
+
+        return cleaned_data
+
 
 class search_Product_PriceForm(forms.Form):
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
@@ -319,7 +385,13 @@ class Store_Purchase_Form(forms.ModelForm):
 
 
 class Store_Purchase_ProductForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
+
+    product = forms.ModelChoiceField(
+        queryset=Product.objects.filter(is_deleted=False),
+        empty_label="Select Product",
+        required=False
+    )
+
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     # unit_price = forms.FloatField( label='Unit Price',required=False)
     
@@ -330,13 +402,14 @@ class Store_Purchase_ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.salereceipt = kwargs.pop('salereceipt', None)
         super(Store_Purchase_ProductForm, self).__init__(*args, **kwargs)
+        
 
     def clean(self):
         cleaned_data = super().clean()
         product = cleaned_data.get('product')
         if product and self.salereceipt:
             if Store_Purchase_Product.objects.filter(store_purchase_note=self.salereceipt, product=product).exists():
-                self.add_error('product', f'The product "{product}" has already been added to this gate pass.')
+                self.add_error('product', f'The product "{product}" has already been added to this Purchase note.')
         return cleaned_data
 
 
@@ -345,19 +418,24 @@ class Sales_ReceiptForm(forms.ModelForm):
         queryset=Customer.objects.filter(is_deleted=False),
         empty_label="Select Customer",required=True
     )
+    Region = forms.ModelChoiceField(
+        queryset=Region.objects.filter(is_deleted=False),
+        empty_label="Select Region",required=True
+    )
     class Meta:
         model = Sales_Receipt
-        fields = ['customer_name',]
+        fields = ['customer_name','region']
     def __init__(self, *args, **kwargs):
         super(Sales_ReceiptForm, self).__init__(*args, **kwargs)
         # Check if an instance is passed
         if self.instance and self.instance.pk:
             # Set the initial value of customer_name
             self.fields['customer_name'].initial = self.instance.customer_name
+            self.fields['region'].initial = self.instance.region
 
 
 class Sales_Receipt_ProductForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
+    product = forms.ModelChoiceField(queryset=Final_Product.objects.filter(is_deleted=False), empty_label="Select Product")
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     # unit_price = forms.FloatField( label='Unit Price',required=False)
     
@@ -374,9 +452,8 @@ class Sales_Receipt_ProductForm(forms.ModelForm):
         product = cleaned_data.get('product')
         if product and self.salereceipt:
             if Sales_Receipt_Product.objects.filter(salereceipt=self.salereceipt, product=product).exists():
-                self.add_error('product', f'The product "{product}" has already been added to this gate pass.')
+                self.add_error('product', f'The product "{product}" has already been added to this Sales Reciept.')
         return cleaned_data
-    
 
 class Sales_Cash_ReceiptForm(forms.ModelForm):
     customer=forms.CharField(max_length=220 , required=True)

@@ -229,7 +229,8 @@ class Customer(models.Model):
 class Sales_Receipt(models.Model):
     products = models.ManyToManyField(Product, through='Sales_Receipt_Product')
     date_created = models.DateTimeField(auto_now_add=True)
-    customer_name =  models.ForeignKey(Customer,on_delete=models.RESTRICT,null=True)
+    customer_name =  models.ForeignKey(Customer,on_delete=models.RESTRICT,null=True,blank=True)
+    region =  models.ForeignKey(Region,on_delete=models.RESTRICT,null=True,blank=True)
     customer =  models.CharField(max_length=220,null=True,blank=True)
     phone_number = models.CharField(max_length=12)
     created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
@@ -339,9 +340,19 @@ class Cheque(models.Model):
         # return f"{self.customer} {self.cheque_number}".capitalize()
 
 class Product_Price(models.Model):
-    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='finl_product_price')
+    product = models.ForeignKey(Product, on_delete=models.RESTRICT, related_name='finl_product_price')
     region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
     customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    price = models.FloatField()
+    is_deleted=models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('product', 'customer')  # Ensure each customer has one price per product
+        
+class Final_Product_Price(models.Model):
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='finl_product_price')
+    region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
+    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT,null=True ,blank=True)
     price = models.FloatField()
     is_deleted=models.BooleanField(default=False)
 

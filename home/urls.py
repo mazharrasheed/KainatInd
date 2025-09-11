@@ -74,6 +74,12 @@ urlpatterns = [
     path('edit_product_price/<int:id>', prices.edit_product_price , name="editproductprice"),
     path('deleteproduct_price/<int:id>', prices.delete_product_price , name="deleteproductprice"),
 
+# Search Product and Final Product Price
+    path('search_product_price/<int:id>', prices.search_product_price , name="searchproductprice"),
+    path('add_final_product_price/<int:id>', prices.add_final_product_price , name="addfinalproductprice"),
+    path('edit_final_product_price/<int:id>', prices.edit_final_product_price , name="editfinalproductprice"),
+    path('deleteproduct_price/<int:id>', prices.delete_final_product_price , name="deletefinalproductprice"),
+
 # Employees
     path('employees/', employees.employees , name="employees"),
     path('add_employee/', employees.add_employee , name="addemployee"),

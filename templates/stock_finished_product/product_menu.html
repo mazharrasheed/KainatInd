@@ -17,6 +17,9 @@
       {% for category in categories %}
       {% if perms.home.add_product %}
       <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light" href="/add-finished-product?category={{category.id}}" class="list-group-item">Add Product</a></h4>  
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light " href="{% url 'addfinalproductprice' category.id %}" class="list-group-item">
+      Add Product Price
+    </a></h4>  
       
       {% endif %}
       {% endfor %}
@@ -30,7 +33,7 @@
       {% if prod %}
 
       {% for category in categories %}
-      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="/product?category={{category.id}}" class="list-group-item">{{category.name}}</a></h4>
+      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="/finished_product?category={{category.id}}" class="list-group-item">{{category.name}}</a></h4>
       
       {% endfor %}
       {% endif %}
