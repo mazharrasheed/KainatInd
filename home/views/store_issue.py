@@ -3,7 +3,7 @@
 from django.shortcuts import redirect, render,get_object_or_404
 from django.contrib.auth.decorators import login_required,permission_required
 from ..forms import  Store_Issue_ProductForm,Store_issue_Form
-from ..models import Store_Issue_Note, Store_Issue_Product ,Product,Inventory
+from ..models import Store_Issue_Note, Store_Issue_Product ,Product,Inventory,Final_Product
 from django.contrib import messages
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -137,6 +137,7 @@ def get_stock(request,id):
     print(stock_qty)
     print(id,stock_qty)
     return JsonResponse({'success': True,'stock':stock_qty})
+
 
 @login_required
 @permission_required('home.delete_store_issue_note', login_url='/login/')

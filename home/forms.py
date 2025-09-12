@@ -16,7 +16,7 @@ from crispy_forms.layout import Submit
 from .models import Category,Product,Account,Transaction,GatePassProduct,GatePass,Unit,Sales_Receipt,Inventory
 from .models import Customer,Sales_Receipt_Product,Suppliers,Cheque,Employee,Product_Price,Project,Final_Product
 from .models import Store_Issue_Note,Store_Issue_Product,Store_Purchase_Note,Store_Purchase_Product,Finish_Product_Category
-from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company
+from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company,Final_Product_Note,Final_Product_Note_Product
 
 
 class Create_User_Form(UserCreationForm):
@@ -387,8 +387,19 @@ class Store_Issue_ProductForm(forms.ModelForm):
                 self.add_error('product', f'The product "{product}" has already been added to this gate pass.')
         return cleaned_data
     
+class FinalProductNoteForm(forms.ModelForm):
+    class Meta:
+        model = Final_Product_Note
+        fields = []  # date_created + created_by handled in view
 
 
+class FinalProductNoteProductForm(forms.ModelForm):
+    class Meta:
+        model = Final_Product_Note_Product
+        fields = ['product', 'quantity']
+        widgets = {
+            'remarks': forms.TextInput(attrs={'placeholder': 'Optional remarks'})
+        }
 
 class Store_Purchase_Form(forms.ModelForm):
     project = forms.ModelChoiceField(
@@ -434,49 +445,92 @@ class Store_Purchase_ProductForm(forms.ModelForm):
             if Store_Purchase_Product.objects.filter(store_purchase_note=self.salereceipt, product=product).exists():
                 self.add_error('product', f'The product "{product}" has already been added to this Purchase note.')
         return cleaned_data
-
-
+    
 class Sales_ReceiptForm(forms.ModelForm):
     customer_name = forms.ModelChoiceField(
         queryset=Customer.objects.filter(is_deleted=False),
-        empty_label="Select Customer",required=True
+        empty_label="Select Customer",
+        required=False
     )
-    Region = forms.ModelChoiceField(
+    region = forms.ModelChoiceField(
         queryset=Region.objects.filter(is_deleted=False),
-        empty_label="Select Region",required=True
+        empty_label="Select Region",
+        required=False
     )
+
     class Meta:
         model = Sales_Receipt
-        fields = ['customer_name','region']
+        fields = ['customer_name', 'region']
+
     def __init__(self, *args, **kwargs):
         super(Sales_ReceiptForm, self).__init__(*args, **kwargs)
-        # Check if an instance is passed
         if self.instance and self.instance.pk:
-            # Set the initial value of customer_name
             self.fields['customer_name'].initial = self.instance.customer_name
             self.fields['region'].initial = self.instance.region
 
+    def clean(self):
+        cleaned_data = super().clean()
+        customer = cleaned_data.get("customer_name")
+        region = cleaned_data.get("region")
+
+        if not customer and not region:
+            raise forms.ValidationError("Either Customer or Region must be selected.")
+
+        return cleaned_data
+
 
 class Sales_Receipt_ProductForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Final_Product.objects.filter(is_deleted=False), empty_label="Select Product")
-    quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
-    # unit_price = forms.FloatField( label='Unit Price',required=False)
-    
+    product = forms.ModelChoiceField(
+        queryset=Final_Product.objects.filter(is_deleted=False),
+        empty_label="Select Product"
+    )
+    quantity = forms.IntegerField(min_value=1, initial=1, label="Quantity")
+
     class Meta:
         model = Sales_Receipt_Product
         fields = ['product', 'quantity']
 
-    def __init__(self, *args, **kwargs):
-        self.salereceipt = kwargs.pop('salereceipt', None)
-        super(Sales_Receipt_ProductForm, self).__init__(*args, **kwargs)
+# class Sales_ReceiptForm(forms.ModelForm):
+#     customer_name = forms.ModelChoiceField(
+#         queryset=Customer.objects.filter(is_deleted=False),
+#         empty_label="Select Customer",required=True
+#     )
+#     Region = forms.ModelChoiceField(
+#         queryset=Region.objects.filter(is_deleted=False),
+#         empty_label="Select Region",required=True
+#     )
+#     class Meta:
+#         model = Sales_Receipt
+#         fields = ['customer_name','region']
+#     def __init__(self, *args, **kwargs):
+#         super(Sales_ReceiptForm, self).__init__(*args, **kwargs)
+#         # Check if an instance is passed
+#         if self.instance and self.instance.pk:
+#             # Set the initial value of customer_name
+#             self.fields['customer_name'].initial = self.instance.customer_name
+#             self.fields['region'].initial = self.instance.region
 
-    def clean(self):
-        cleaned_data = super().clean()
-        product = cleaned_data.get('product')
-        if product and self.salereceipt:
-            if Sales_Receipt_Product.objects.filter(salereceipt=self.salereceipt, product=product).exists():
-                self.add_error('product', f'The product "{product}" has already been added to this Sales Reciept.')
-        return cleaned_data
+
+# class Sales_Receipt_ProductForm(forms.ModelForm):
+#     product = forms.ModelChoiceField(queryset=Final_Product.objects.filter(is_deleted=False), empty_label="Select Product")
+#     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
+#     # unit_price = forms.FloatField( label='Unit Price',required=False)
+    
+#     class Meta:
+#         model = Sales_Receipt_Product
+#         fields = ['product', 'quantity']
+
+#     def __init__(self, *args, **kwargs):
+#         self.salereceipt = kwargs.pop('salereceipt', None)
+#         super(Sales_Receipt_ProductForm, self).__init__(*args, **kwargs)
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         product = cleaned_data.get('product')
+#         if product and self.salereceipt:
+#             if Sales_Receipt_Product.objects.filter(salereceipt=self.salereceipt, product=product).exists():
+#                 self.add_error('product', f'The product "{product}" has already been added to this Sales Reciept.')
+#         return cleaned_data
 
 class Sales_Cash_ReceiptForm(forms.ModelForm):
     customer=forms.CharField(max_length=220 , required=True)

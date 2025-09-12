@@ -3,13 +3,24 @@
 from django.shortcuts import redirect, render,get_object_or_404
 from django.contrib.auth.decorators import login_required,permission_required
 from ..forms import  Sales_Receipt_ProductForm,Sales_ReceiptForm,Sales_Cash_Receipt_ProductForm,Sales_Cash_ReceiptForm
-from ..models import Sales_Receipt, Sales_Receipt_Product,Product,Product_Price,Transaction,Account,Customer
+from ..models import Sales_Receipt, Sales_Receipt_Product,Product,Product_Price,Transaction,Account,Customer,Final_Product,Final_Product_Price
 from django.contrib import messages
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.db.models import Avg,Min,Max,Count,Sum
 from collections import defaultdict
 from django.db import IntegrityError
+
+
+@login_required
+def get_final_product_stock(request,id):
+    print('fdfsfdf')
+    product=Final_Product.objects.get(id=id)
+    stock_qty=product.get_current_stock()
+    print(stock_qty)
+    print(id,stock_qty)
+    return JsonResponse({'success': True,'stock':stock_qty})
+
 
 @login_required
 @permission_required('home.view_sales_receipt', login_url='/login/')
@@ -63,43 +74,99 @@ def salereceipt(request):
         'form_salereceipt':form_salereceipt,   
     })
 
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import render, get_object_or_404
 @login_required
-@permission_required('home.add_sales_receipt', login_url='/login/')
+@permission_required('sale.add_sales_receipt', login_url='/login/')
+def create_salereceipt(request):
+    if request.method == 'POST':
+        print("HEADERS:", request.headers)
+        print("POST:", request.POST)
+        print("FILES:", request.FILES)
+
+        if 'finalize' not in request.POST:
+            return JsonResponse({'success': False, 'errors': 'Finalize button not clicked or not sent.'})
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required, permission_required
+from ..forms import Sales_ReceiptForm, Sales_Receipt_ProductForm
+from ..models import Sales_Receipt, Sales_Receipt_Product, Final_Product, Final_Product_Price
+
+@login_required
+@permission_required('sale.add_sales_receipt', login_url='/login/')
 def create_salereceipt(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        if 'finalize' in request.POST:  # Finalize the purchase note
+        if 'finalize' in request.POST:
             form_salereceipt = Sales_ReceiptForm(request.POST)
             products = request.POST.getlist('products[]')
+
             if form_salereceipt.is_valid() and products:
                 salercpt = form_salereceipt.save(commit=False)
                 salercpt.created_by = request.user
                 salercpt.save()
-                customer=form_salereceipt.cleaned_data.get('customer_name')
+
+                customer = form_salereceipt.cleaned_data.get('customer_name')
+                region = form_salereceipt.cleaned_data.get('region')
+
                 for product_data in products:
-                    product_id, quantity = product_data.split(':')
-                    product=Product.objects.get(id=product_id)
-                    unit_price_cust=Product_Price.objects.get(is_deleted=False,customer=customer,product=product)
-                    quantity=int(quantity)
-                    unit_price = float(unit_price_cust.price)
-                    amount=unit_price*quantity
-                    Sales_Receipt_Product.objects.create(
-                        salereceipt=salercpt,
-                        product_id=product_id,
-                        quantity=quantity,
-                        unit_price=unit_price,
-                        amount=amount
-                    )
-                    Product.objects.get(id=product_id).change_status()
+                    try:
+                        product_id, quantity = product_data.split(':')
+                        product = get_object_or_404(Final_Product, id=product_id)
+
+                        # Find unit price for customer first, else region
+                        unit_price_obj = None
+                        if customer:
+                            unit_price_obj = Final_Product_Price.objects.filter(
+                                is_deleted=False,
+                                customer=customer,
+                                product=product
+                            ).first()
+                        if not unit_price_obj and region:
+                            unit_price_obj = Final_Product_Price.objects.filter(
+                                is_deleted=False,
+                                region=region,
+                                product=product
+                            ).first()
+
+                        if not unit_price_obj:
+                            return JsonResponse({
+                                'success': False,
+                                'errors': f'No price defined for product {product.productname}'
+                            })
+
+                        quantity = int(quantity)
+                        unit_price = float(unit_price_obj.price)
+                        amount = unit_price * quantity
+
+                        Sales_Receipt_Product.objects.create(
+                            salereceipt=salercpt,
+                            product=product,
+                            quantity=quantity,
+                            unit_price=unit_price,
+                            amount=amount
+                        )
+
+                        product.change_status()
+
+                    except Exception as e:
+                        return JsonResponse({'success': False, 'errors': str(e)})
+
                 return JsonResponse({'success': True, 'redirect_url': '/list-sales?customer=True'})
             else:
-                return JsonResponse({'success': False, 'errors': 'Invalid form data or no products selected.'})
+                return JsonResponse({'success': False, 'errors': form_salereceipt.errors.as_json()})
+
     else:
         form = Sales_Receipt_ProductForm()
         form_salereceipt = Sales_ReceiptForm()
+
     return render(request, 'sale/create_salereceipt.html', {
         'form': form,
         'form_salereceipt': form_salereceipt,
     })
+
 
 
 

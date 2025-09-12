@@ -3,7 +3,7 @@ from django.urls import  path
 from home.views import category,product
 from home.views import users,views,accounts,store_issue,store_purchase,finished_product,finished_pro_category
 from home.views import gatepass,sales,suppliers,customers,cheques,employees,prices,company,store_issue_request
-from home.views import regions
+from home.views import regions,final_product_note
 from home.models import Category
 from django.conf.urls.static import static
 
@@ -132,6 +132,10 @@ urlpatterns = [
     path('print-salereceipt/<int:salereceipt_id>/', sales.print_salereceipt, name='print_salereceipt'),
     path('make_transaction/<int:id>/', sales.make_transaction, name='maketransaction'),
 
+# Get Stock for Issue and Sales
+    path('get-stock/<int:id>/', store_issue.get_stock, name='get-stock'),
+    path('get-stock-final-product/<int:id>/', sales.get_final_product_stock, name='getstockfinalproduct'),
+
 # Store Issue request
 
     path('list-store-issue-request/', store_issue_request.list_store_issue_request, name='list_store_issue_request'),
@@ -142,12 +146,16 @@ urlpatterns = [
     path('delete-store-issue-request/<int:id>/', store_issue_request.delete_store_issue_request, name='delete_store_issue_request'),
 
 # Store Issue
-    path('get-stock/<int:id>/', store_issue.get_stock, name='get-stock'),
+    
     path('list-store-issue/', store_issue.list_store_issue, name='list_store_issue'),
     path('create-store-issue/', store_issue.create_store_issue_note, name='create_store_issue'),
     path('edit-store-issue/<int:issue_note_id>/', store_issue.edit_store_issue_note, name='edit_store_issue'),
     path('print-store-issue/<int:issue_note_id>/', store_issue.print_store_issue, name='print_store_issue'),
     path('delete-store-issue/<int:id>/', store_issue.delete_store_issue, name='delete_store_issue_note'),
+
+# Final Product Note
+    path('list-final-pro-note/', final_product_note.list_final_product_note, name='list_final_pro_note'),
+    path('create-final-pro-note/', final_product_note.create_final_product_note, name='create_final_pro_note'),
 
 # store purchase
     path('list-store-purchase/', store_purchase.list_store_purchase, name='list_store_purchase'),

@@ -97,7 +97,7 @@ class Final_Product(models.Model):
             
         def get_current_stock(self):
             """Calculate the current stock of this product."""
-            grn_total = Store_Purchase_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
+            grn_total = Final_Product_Note_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
             sale_total = Sales_Receipt_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
             current_stock = grn_total - sale_total
             return current_stock
@@ -264,7 +264,7 @@ class Customer(models.Model):
         # return f"{self.coname.capitalize()} "
 
 class Sales_Receipt(models.Model):
-    products = models.ManyToManyField(Product, through='Sales_Receipt_Product')
+    products = models.ManyToManyField(Final_Product, through='Sales_Receipt_Product')
     date_created = models.DateTimeField(auto_now_add=True)
     customer_name =  models.ForeignKey(Customer,on_delete=models.RESTRICT,null=True,blank=True)
     region =  models.ForeignKey(Region,on_delete=models.RESTRICT,null=True,blank=True)
@@ -279,7 +279,7 @@ class Sales_Receipt(models.Model):
 
 class Sales_Receipt_Product(models.Model):
     salereceipt = models.ForeignKey(Sales_Receipt, on_delete=models.RESTRICT)
-    product = models.ForeignKey(Product, on_delete=models.RESTRICT)
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
     quantity = models.PositiveIntegerField()
     unit_price = models.FloatField()
     amount = models.FloatField()
@@ -338,6 +338,21 @@ class Store_Purchase_Note(models.Model):
 class Store_Purchase_Product(models.Model):
     store_purchase_note = models.ForeignKey(Store_Purchase_Note, on_delete=models.RESTRICT)
     product = models.ForeignKey(Product, on_delete=models.RESTRICT)
+    quantity = models.PositiveIntegerField()
+    def __str__(self):
+        return f"{self.product.productname} (Qty: {self.quantity})"
+    
+
+class Final_Product_Note(models.Model):
+    products = models.ManyToManyField(Final_Product, through='Final_Product_Note_Product')
+    date_created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
+    def __str__(self):
+        return f"Final Product Note {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
+
+class Final_Product_Note_Product(models.Model):
+    final_product_note = models.ForeignKey(Final_Product_Note, on_delete=models.RESTRICT)
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
     quantity = models.PositiveIntegerField()
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"

@@ -49,7 +49,7 @@ def add_product(request,id=''):
       mydata=Final_Product.objects.filter(is_deleted=False,category=cat).order_by("-id")
       form = Finish_ProductForm(initial={'category': cat})
   data={'form': form, 'mydata':mydata,'categories':categories,'prod':True}
-  return render(request, 'stock_finished_product/add_Product.html', data)
+  return render(request, 'stock_finished_product/add_product.html', data)
 
 @login_required
 @permission_required('home.change_sales_product', login_url='/login/')
@@ -67,7 +67,7 @@ def edit_product(request,id):
     mydata=Final_Product.objects.get(id=id) 
     form = Finish_ProductForm(instance=mydata)
   data={'form': form, 'mydata':mydata,'update':True,}
-  return render(request, 'stock_finished_product/add_Product.html', data)
+  return render(request, 'stock_finished_product/add_product.html', data)
 
 @login_required
 @permission_required('home.delete_product', login_url='/login/')
