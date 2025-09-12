@@ -19,10 +19,11 @@ Add Category {% endblock title %}
     <div class="main-body">
       <div class="page-wrapper">
         <div class="page-body">
+           {% include 'stock_finished_product/product_menu.html' %}
   <div class="row">
  
-    <div class="col-3 ">
-      <h2 class="text-center alert alert-info">Add Category</h2>
+    <div class="col-md-5 offset-md-2 ">
+      <h2 class="text-center alert alert-info">Add Product Category</h2>
       <form method="post">
         {% csrf_token %}
         {{form|crispy}}
@@ -32,7 +33,9 @@ Add Category {% endblock title %}
       </form>
   
     </div>
-    <div class="col-9  ">
+    </div>
+    <div class="row">
+    <div class="col-12 mt-5  ">
       <h2 class="text-center alert alert-info">Categories</h2>
 
       {% if mydata %}
@@ -82,7 +85,7 @@ Add Category {% endblock title %}
   </div>
 </div>
 
-
+</div>
   <script>
      $(document).ready(function () {
         // Wait for 4 seconds and then hide the element with id "msg"

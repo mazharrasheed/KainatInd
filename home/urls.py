@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import  path
 from home.views import category,product
 from home.views import users,views,accounts,store_issue,store_purchase,finished_product,finished_pro_category
-from home.views import gatepass,sales,suppliers,customers,cheques,employees,prices,project,store_issue_request
+from home.views import gatepass,sales,suppliers,customers,cheques,employees,prices,company,store_issue_request
 from home.views import regions
 from home.models import Category
 from django.conf.urls.static import static
@@ -31,10 +31,10 @@ urlpatterns = [
     path('edit/<int:id>', views.edit_data , name="editdata"),
     path('editprofile/<int:id>', views.editprofile , name="editprofile"),
 
-# Projects
-    path('project/', project.add_project , name="project"),
-    path('project/<int:id>', project.edit_project , name="editproject"),
-    path('deleteproject/<int:id>', project.delete_project , name="deleteproject"),
+# Companies
+    path('company/', company.add_company , name="company"),
+    path('company/<int:id>', company.edit_company , name="editcompany"),
+    path('deleteproject/<int:id>', company.delete_company , name="deletecompany"),
 
 # Regions
     path('region/', regions.add_Region , name="region"),
@@ -83,6 +83,7 @@ urlpatterns = [
 
 # Employees
     path('employees/', employees.employees , name="employees"),
+    path('employees_detail/<int:id>', employees.employees_detail , name="employeesdetail"),
     path('add_employee/', employees.add_employee , name="addemployee"),
     path('editemployee/<int:id>', employees.edit_employee , name="editemployee"),
     path('deleteemployee/<int:id>', employees.delete_employee , name="deleteemployee"),

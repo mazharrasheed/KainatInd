@@ -34,6 +34,12 @@ class Region(models.Model):
     def __str__(self):
         return self.name
     
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    is_deleted=models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.name
 class Project(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
@@ -51,23 +57,27 @@ class Finish_Product_Category(models.Model):
 class Final_Product(models.Model):
         ACTIVE = 'Atcive'
         INACTIVE = 'Inactive'
+        KGS='Kgs'
+        NOS='Nos'
 
         STATUS_TYPE_CHOICES = [
         (ACTIVE , 'Active'),
         (INACTIVE ,'Inactive'),
     ]
+        UNIT_CHOICES = [
+        (NOS ,'Nos'),
+        (KGS ,'Kgs')
+    ]
 
-        category=models.ForeignKey(Finish_Product_Category,on_delete=models.RESTRICT)
         productname=models.CharField(max_length=255,unique=True)
-        product_size=models.CharField(max_length=255)
-        # product_sale_price=models.CharField(max_length=255)
-        product_quantity=models.CharField(max_length=255,null=True,blank=True )
-        unit=models.CharField(max_length=255,default="Nos")
-        weight=models.FloatField(max_length=255,default=0,null=True,blank=True)
-        # product_status=models.CharField(max_length=50,choices=STATUS_TYPE_CHOICES)
+        unit=models.CharField(max_length=50,choices=UNIT_CHOICES,default=NOS)
+        category=models.ForeignKey(Finish_Product_Category,on_delete=models.RESTRICT)
+        company=models.ForeignKey(Company,on_delete=models.RESTRICT)
+        purchase=models.FloatField(null=True,blank=True)
+        sale_rate=models.FloatField(null=True,blank=True)
+        labour=models.FloatField(null=True,blank=True)
         product_status=models.BooleanField(default=True)
         is_deleted = models.BooleanField(default=False)
-        pro_img=models.ImageField(upload_to="uploaded/products/",null=True)
         product_slug=AutoSlugField(populate_from="productname",unique=True,null=True,default=None)
         def __str__(self):
             return f"{self.productname}"
@@ -75,9 +85,35 @@ class Final_Product(models.Model):
         def get_price_for_customer(self, customer):
             # Get the price for this product for a specific customer
             try:
-                return self.product_price.get(customer=customer).price
+                return self.final_produt_price.get(customer=customer).price
             except Product_Price.DoesNotExist:
                 return None    
+        def get_price_for_region(self, region):
+            # Get the price for this product for a specific customer
+            try:
+                return self.final_product_price.get(region=region).price
+            except Product_Price.DoesNotExist:
+                return None    
+            
+        def get_current_stock(self):
+            """Calculate the current stock of this product."""
+            grn_total = Store_Purchase_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
+            sale_total = Sales_Receipt_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
+            current_stock = grn_total - sale_total
+            return current_stock
+    
+        def change_status(self):
+            """Calculate the current stock of this product."""
+            current_stock = self.get_current_stock()
+            if current_stock <= 0:
+                product=Final_Product.objects.get(id=self.id)
+                product.product_status=False
+                product.save()
+            else:
+                product=Final_Product.objects.get(id=self.id)
+                product.product_status=True
+                product.save()
+            print(self.product_status)
     
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -217,8 +253,9 @@ class GatePassProduct(models.Model):
     
 class Customer(models.Model):
     coname=models.CharField(max_length=255)
+    region = models.ForeignKey(Region, on_delete=models.RESTRICT)
     name=models.CharField(max_length=255)
-    adress=models.CharField(max_length=255)
+    address=models.CharField(max_length=255)
     contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
     is_deleted = models.BooleanField(default=False)
 
@@ -306,10 +343,55 @@ class Store_Purchase_Product(models.Model):
         return f"{self.product.productname} (Qty: {self.quantity})"
     
 class Employee(models.Model):
+
+    ADMIN = 'Admin'
+    ACCOUNTANT = 'Accontant'
+    PURCHASER='Purchaser'
+    OFFICE_BOY='Office Boy'
+    SECURITY_GAURD='Security Guard'
+    DRIVER='Driver'
+    MACHINE_OPERATOR='Machine Operator'
+    FOREMAN = 'Foreman'
+    LABOUR_INCHARGE='Labour Incharge'
+    FITTER='Fitter'
+    SWEEPER = 'Sweeper'
+
+    DESIGNATION_TYPE_CHOICES = [
+        (ADMIN ,'Admin'),
+        (ACCOUNTANT ,'Accontant'),
+        (PURCHASER,'Purchaser'),
+        (OFFICE_BOY,'Office Boy'),
+        (SECURITY_GAURD,'Security Guard'),
+        ( DRIVER,'Driver'),
+        ( MACHINE_OPERATOR,'Machine Operator'),
+        (FOREMAN ,'Foreman'),
+        (LABOUR_INCHARGE,'Labour Incharge'),
+        (FITTER,'Fitter'),
+        (SWEEPER , 'Sweeper'),
+    ]
+
+    ALL_TYPE='All Type'
+    CONTRACTORS='Contractors'
+    WEEKLY='Weekly'
+    MONTHLY='Monthly'
+
+    JOB_TYPE_CHOICES = [
+        (ALL_TYPE,'All Type'),
+        (CONTRACTORS,'Contractors'),
+        (WEEKLY,'Weekly'),
+        (MONTHLY,'Monthly'),
+    ]
+
     name=models.CharField(max_length=255)
-    adress=models.CharField(max_length=255,null=True,blank=True)
+    fname=models.CharField(max_length=255)
+    cnic=models.CharField(max_length=13)
+    designation = models.CharField(max_length=50, choices=DESIGNATION_TYPE_CHOICES)
+    address=models.CharField(max_length=255,null=True,blank=True)
+    salary=models.PositiveIntegerField()
+    instalment=models.PositiveIntegerField()
+    order=models.CharField(max_length=255)
+    type = models.CharField(max_length=50, choices=JOB_TYPE_CHOICES)
     contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
-    job=models.CharField(max_length=255)
     is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
@@ -325,8 +407,7 @@ class Suppliers(models.Model):
 
     def __str__(self):
         return self.coname
-    
-    
+
 class Cheque(models.Model):
     customer=models.ForeignKey(Customer, on_delete=models.RESTRICT)
     cheque_number=models.CharField(max_length=20,null=True,blank=True)
@@ -389,8 +470,8 @@ class Account(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     account_type = models.CharField(max_length=50, choices=ACCOUNT_TYPE_CHOICES)
     address=models.CharField(max_length=255,null=True,blank=True)
-    contact=models.CharField(max_length=11,null=True,unique=True,blank=True)
-    mobile=models.CharField(max_length=11,null=True , blank=True,unique=True)
+    contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
+    mobile=models.CharField(max_length=12,null=True , blank=True,unique=True)
     date = models.DateTimeField(default=datetime.now())
     is_deleted=models.BooleanField(default=False)
     def __str__(self):

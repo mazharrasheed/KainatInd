@@ -21,74 +21,77 @@ Customers {% endblock title %}
         <div class="page-body">
           <div class="row">
 
-            <div class="col-12">
+            <div class="col-md-12">
               <h2 class="text-center alert alert-info">Customers List</h2>
+              {% if perms.home.add_customer %}
+              <a href="{% url 'addcustomer' %}" class=" fs-6 btn btn-primary col-md-2 m-3"> <i class="ti-plus"> </i>Add Customer</a>
+              {% endif %}
               <div class="card py">
-                {% if perms.home.add_customer %}
-                <a href="{% url 'addcustomer' %}" class=" fs-6 btn btn-primary col-md-2">Add Customer</a>
-                {% endif %}
-                <div class="card py">
-                  <div class="table-responsive py-2">
+                <div class="table-responsive py-2">
 
-                    {% if customers%}
-                    <table class="table table-flush" id="datatable">
-                      <thead class="thead-light">
-                        <tr>
-                          <th class="border-bottom fw-bolder text-center fs-6" scope="col">
-                            Sr#
-                          </th>
-                          <th class="border-bottom fw-bolder text-center fs-6" scope="col">
-                            Company Name
-                          </th>
-                          <th class="border-bottom fw-bolder text-center fs-6" scope="col">
-                            Owner Name
-                          </th>
-                          <th class="border-bottom fw-bolder text-center fs-6" scope="col">
-                            Adress
-                          </th>
-                          <th class="border-bottom fw-bolder text-center fs-6" scope="col">
-                            Contact
-                          </th>
+                  {% if customers%}
+                  <table class="table table-flush" id="datatable">
+                    <thead class="thead-light">
+                      <tr>
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Sr#
+                        </th>
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Company Name
+                        </th>
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Owner Name
+                        </th>
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Region
+                        </th>
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Adress
+                        </th>
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Contact
+                        </th>
 
-                          <th class="border-bottom fw-bolder text-center fs-6" scope="col">
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for customer in customers %}
-                        <tr id="customer-{{ customer.id }}">
-                          <td class="text-center fs-6">{{ forloop.counter }}</td>
-                          <td class="text-center fs-6">{{ customer.coname|capitalize_after_space }}</td>
-                          <td class="text-center fs-6">{{ customer.name|capitalize_after_space }}</td>
-                          <td class="text-center fs-6">{{ customer.adress|capitalize_after_space }}</td>
-                          <td class="text-center fs-6">{{ customer.contact }}</td>
-                          <td class="text-center">
+                        <th class="border-bottom fw-bolder text-center fs-6" scope="col">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for customer in customers %}
+                      <tr id="customer-{{ customer.id }}">
+                        <td class="text-center fs-6">{{ forloop.counter }}</td>
+                        <td class="text-center fs-6">{{ customer.coname|capitalize_after_space }}</td>
+                        <td class="text-center fs-6">{{ customer.name|capitalize_after_space }}</td>
+                        <td class="text-center fs-6">{{ customer.region|capitalize_after_space }}</td>
+                        <td class="text-center fs-6">{{ customer.address|capitalize_after_space }}</td>
+                        <td class="text-center fs-6">{{ customer.contact }}</td>
+                        <td class="text-center">
 
 
-                            {% if perms.home.change_customer %}
-                            <a class="btn btn-warning fs-6" href="{% url 'editcustomer' customer.id %}">Edit</a>
-                            {% else %}
-                            <p>No edit permission </p>
-                            {% endif%}
-                            {% if perms.home.delete_customer %}
-                            <button class="btn btn-danger delete-customer fs-6" data-customer-id="{{ customer.id }}">
-                              Delete
-                            </button>
-                            {% else %}
-                            <p>No delete permission </p>
-                            {% endif%}
-                          </td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                    {% else %}
-                    <h4 class="text-center alert alert-warning">No Record Found</h4>
-                    {% endif %}
-                  </div>
+                          {% if perms.home.change_customer %}
+                          <a class="btn btn-warning  text-light fs-6" href="{% url 'editcustomer' customer.id %}"><i class="ti-pencil-alt"></i>Edit</a>
+                          {% else %}
+                          <p>No edit permission </p>
+                          {% endif%}
+                          {% if perms.home.delete_customer %}
+                          <button class="btn btn-danger delete-customer fs-6" data-customer-id="{{ customer.id }}">
+                           <i class="ti-trash"></i> Delete
+                          </button>
+                          {% else %}
+                          <p>No delete permission </p>
+                          {% endif%}
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  {% else %}
+                  <h4 class="text-center alert alert-warning">No Record Found</h4>
+                  {% endif %}
                 </div>
               </div>
+
             </div>
           </div>
         </div>

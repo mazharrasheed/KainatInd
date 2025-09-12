@@ -21,7 +21,7 @@ Add Account {% endblock title %}
         <div class="page-body">
 
   <div class="row">
-    <div class="col-m-4 offset-md-4">
+    <div class="col-md-6 offset-md-3">
       <h2 class="text-center  alert alert-info">{% if update %} Edit {{account_type|title}} {% else %} Add {% endif %}  {% if account_type %}
         {{account_type|title}} {% else %} General
       {% endif %}  Account </h2>
@@ -30,14 +30,14 @@ Add Account {% endblock title %}
         {{form|crispy}}
         <input type="submit" class="btn btn-info" {% if update %} value="Update Account" {% else %} value="Create Account"
           {% endif %}>
-        <a class="btn btn-warning" href="/accounts/">Accounts</a>
+        <a class="btn btn-warning" href="/create_accounts/">Accounts</a>
       </form>
     </div>
 
     </div>
 
     <div class="col-12 mt-5">
-      <h2 class="text-center  alert alert-info">{{account_type|title}} Accounts List</h2>
+      <h2 class="text-center  alert alert-info">{% if account_type == none %} General {% else%}{{account_type|title}} {% endif %} Accounts List</h2>
       <div class="table-responsive py-2">
         {% if mydata %}
         <table class="table table-flush" id="datatable">

@@ -16,7 +16,7 @@ from crispy_forms.layout import Submit
 from .models import Category,Product,Account,Transaction,GatePassProduct,GatePass,Unit,Sales_Receipt,Inventory
 from .models import Customer,Sales_Receipt_Product,Suppliers,Cheque,Employee,Product_Price,Project,Final_Product
 from .models import Store_Issue_Note,Store_Issue_Product,Store_Purchase_Note,Store_Purchase_Product,Finish_Product_Category
-from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price
+from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company
 
 
 class Create_User_Form(UserCreationForm):
@@ -55,10 +55,10 @@ class RegionForm(forms.ModelForm):
         model = Region
         fields = ['name']
 
-class ProjectForm(forms.ModelForm):
+class CopanyForm(forms.ModelForm):
     
     class Meta:
-        model = Project
+        model = Company
         fields = ['name']
 
 class CategoryForm(forms.ModelForm):
@@ -91,9 +91,9 @@ class Finish_ProductForm(forms.ModelForm):
     category = forms.ModelChoiceField(queryset=Finish_Product_Category.objects.filter(is_deleted=False), empty_label="Select Category")
     class Meta:
         model = Final_Product
-        fields = ['category', 'productname','product_size','product_quantity','product_status','pro_img','unit']
-        labels={'productname':'Product Name','product_size':'Product Size',
-                'product_quantity':'Product_Quantity','product_status':'Product_Status','pro_img':'Product Image'}
+        fields = ['productname','unit','category','company','purchase','sale_rate','labour' ]
+        labels={'productname':'Product Name','sale_rate':'Slae Rate'
+                }
         
         widgets = {
 
@@ -102,6 +102,29 @@ class Finish_ProductForm(forms.ModelForm):
             # 'product_status': forms.CheckboxInput(),
             
         }
+
+    def __init__(self, *args, **kwargs):
+        super(Finish_ProductForm, self).__init__(*args, **kwargs)
+        
+        
+        placeholders = {
+            'productname': 'Enter product name',
+            'unit':'Select Unit',
+            'purchase':'Enter purchase rate',
+            'sale_rate':'Enter sale rate',
+            'labour':'Enter labur cost',
+        }
+        for field_name, placeholder in placeholders.items():
+            self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+        # Add 'fs-5' class to all fields' labels
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
+            
+        self.fields['category'].empty_label = "Select"
+        self.fields['company'].empty_label = "Select"
+       
 
 class ProductForm(forms.ModelForm):
     # unit = forms.ModelChoiceField(queryset=Unit.objects.all(), empty_label="Select Unit")
@@ -542,32 +565,49 @@ class AdminUserPrifoleForm(UserChangeForm):
         fields='__all__'
         labels={'email':'Email'}
 
+
 class Employee_form(forms.ModelForm):
    
     class Meta:
         model = Employee
-        fields = [ 'name','contact','job','adress']
-        labels={'name':'Name',
-                'contact':'Contact','adress':'Adress','job':'Job Name',}
+        fields = [ 'name','fname','cnic','designation','address','salary','instalment','type','order','contact']
+        labels={'name':'Name', 'fname':'S/o','cnic':'CNIC #',
+                'contact':'Mobile'}
         
         widgets = {
 
-            # 'product_weight': forms.TextInput(attrs={'placeholder': 'Enter product weight'}),
-            # 'pro_img': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
-            # 'product_status': forms.CheckboxInput(),
+            
         }
 
     def __init__(self, *args, **kwargs):
         super(Employee_form, self).__init__(*args, **kwargs)
+        if self.fields['type'].choices:
+            # remove any default ('', '---------') before prepending "Select"
+            cleaned_choices = [(val, label) for val, label in self.fields['type'].choices if val != '']
+            self.fields['type'].choices = [('', 'Select')] + cleaned_choices
+
+        if self.fields['designation'].choices:
+            # remove any default ('', '---------') before prepending "Select"
+            cleaned_choices = [(val, label) for val, label in self.fields['designation'].choices if val != '']
+            self.fields['designation'].choices = [('', 'Select')] + cleaned_choices
+
         placeholders = {
             
             'name': 'Enter full name',
-            'contact': '0000-0000000',
-            'adress':'Enter Adress here',
-            'job':'Enter job name here',
+            'fname': 'Enter full father name',
+            'cnic': 'xxxxxxxxxxxxx',
+            'contact': 'xxxx-xxxxxxx',
+            'address':'Enter Adress here',
+            'designation':'Enter designation here',
         }
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+        # Add 'fs-5' class to all fields' labels
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
+
 
 class Suppliers_form(forms.ModelForm):
    
@@ -599,19 +639,26 @@ class Customer_form(forms.ModelForm):
    
     class Meta:
         model = Customer
-        fields = ['coname', 'name','contact','adress']
+        fields = ['coname', 'name','region','contact','address']
         labels={'coname':'Company Name','name':'Name',
-                'contact':'Contact','adress':'Adress',}
+                'contact':'Contact','address':'Address',}
     def __init__(self, *args, **kwargs):
         super(Customer_form, self).__init__(*args, **kwargs)
+        self.fields['region'].empty_label = "Select Region"
         placeholders = {
-            'coname': 'Enter first name',
-            'name': 'Enter full name',
-            'contact': '0000-0000000',
-            'adress':'Enter Adress here'
+            'coname': 'Enter business name',
+            'name': 'Enter contact person full name',
+            'region':'Select Region',
+            'contact': 'xxxx-xxxxxxx',
+            'address':'Enter Address here'
         }
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+         # Add 'fs-5' class to all fields' labels
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
 
 class Cheques_form(forms.ModelForm):
     customer = forms.ModelChoiceField(queryset=Customer.objects.filter(is_deleted=False), empty_label="Select Customer")
@@ -665,12 +712,12 @@ class Employee_AccountForm(forms.ModelForm):
         super(Employee_AccountForm, self).__init__(*args, **kwargs)
         
         self.fields['account_type'].choices = [('', 'Select')] + list(self.fields['account_type'].choices)
+        
         self.fields['employee'].empty_label = "Select"
         self.fields['employee'].required = True
         choices = list(self.fields['account_type'].choices)
         # Remove the empty one if it exists
         choices = [(k, v) for k, v in choices if k != '']
-
         self.fields['account_type'].choices = [('', 'Select')] + choices
 
 class Customer_AccountForm(forms.ModelForm):

@@ -89,9 +89,26 @@
                 {% endif %}
               </div>
 
+
+
             </li>
           </ul>
 
+          <ul class="nav-right mt-5">
+             
+            {% if item11 %}
+
+            <li>
+              {% include 'stock/product_menu.html' %}
+            <li>
+           
+              {% elif product11 %}
+            <li>
+              {% include 'stock_finished_product/product_menu.html' %}
+            </li>
+            {% endif %}
+          </ul>
+          
 
           {% if perm %}
           <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -694,10 +711,18 @@
                   </li>
                   {% endif %}
 
-                  {% if perms.home.view_project %}
-                  <li class=" dropdown-item  {% if request.path == '/project/' %} active {% endif %}">
+                  {% if perms.home.view_region %}
+                  <li class=" dropdown-item  {% if request.path == '/region/' %} active {% endif %}">
                     <a href="/region/">
                       <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Regions</span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+                  {% if perms.home.view_company %}
+                  <li class=" dropdown-item  {% if request.path == '/company/' %} active {% endif %}">
+                    <a href="/company/">
+                      <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Company</span>
                     </a>
                   </li>
                   {% endif %}

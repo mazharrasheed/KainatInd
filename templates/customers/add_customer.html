@@ -22,14 +22,25 @@ Add Customer {% endblock title %}
 
 <div class="row">
 
-    <div class="col-md-4 offset-md-4   ">
-      <h2 class="text-center  alert alert-info">Add Customer</h2>
+    <div class="col-md-12    ">
+      <h2 >Add Customer</h2>
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{form|crispy}}
+         <div class="row mt-5">
+                    {% for field in form %}
+                    <div class="col-md-3 mb-5">
+                      {{ field.label_tag }}
+                      {{ field }}
+                      {% if field.errors %}
+                      <div class="text-danger">{{ field.errors }}</div>
+                      {% endif %}
+                    </div>
+                    {% endfor %}
+                  </div>
 
-        <input type="submit" class="btn btn-success" {% if update %} value="Update Customer" {% else %} value="Add Customer" {%endif %}>
-        <a href= "/customers/" class="btn btn-warning" >Customer</a>
+        
+        <button type="submit" class="btn btn-info" >{% if update %} <i class="ti-pencil-alt"></i> Customer {% else %} <i class="ti-pencil-alt"></i> Customer {%endif %}</button>
+        <a href= "/customers/" class="btn btn-warning text-light" > <i class="ti-arrow-left"></i> Customer</a>
       </form>
 
     </div>
@@ -38,7 +49,7 @@ Add Customer {% endblock title %}
 
 
     <div class="col-12 mt-3 ">
-      <h2 class="text-center alert alert-info">Customers List</h2>
+      <h2 >Customers List</h2>
       <div class="card py">
         <div class="table-responsive py-2">
       {% if mydata %}
@@ -61,7 +72,8 @@ Add Customer {% endblock title %}
             <td class="text-center fs-5" >Company Name</td>
             <td class="text-center fs-5" >Owner Name</td>
             <td class="text-center fs-5" >Contact</td>
-            <td class="text-center fs-5" >Adress</td>
+            <td class="text-center fs-5" >region</td>
+            <td class="text-center fs-5" >Address</td>
           
             {% if update %} {% else %}<td class="text-center fs-5" >Action</td> {% endif %}
             
@@ -76,7 +88,8 @@ Add Customer {% endblock title %}
             <td class="text-center fs-5">{{mydata.coname|capitalize_after_space}}</td>
             <td class="text-center fs-5">{{mydata.name|capitalize_after_space}}</td>
             <td class="text-center fs-5">{{mydata.contact}}</td>
-            <td class="text-center fs-5">{{mydata.adress|title}}</td>
+            <td class="text-center fs-5">{{mydata.region|title}}</td>
+            <td class="text-center fs-5">{{mydata.address|title}}</td>
 
           </tr>
           {% else %}
@@ -86,17 +99,18 @@ Add Customer {% endblock title %}
             <td class="text-center fs-5">{{data.coname|capitalize_after_space}}</td>
             <td class="text-center fs-5">{{data.name|capitalize_after_space}}</td>
             <td class="text-center fs-5">{{data.contact}}</td>
-            <td class="text-center fs-5">{{data.adress|capitalize_after_space}}</td>
+            <td class="text-center fs-5">{{data.region|capitalize_after_space}}</td>
+            <td class="text-center fs-5">{{data.address|capitalize_after_space}}</td>
          
             <td  class="text-center fs-5">
               {% if perms.home.change_customer %}
-              <a class="btn fs-6 btn-warning" href={% url 'editcustomer' id=data.id %}>Edit</a>
+              <a class="btn fs-6 test-light btn-warning" href={% url 'editcustomer' id=data.id %}><i class="ti-pencil-alt"></i>Edit</a>
               {% else %}
                 <p>No edit permission </p>
                 {% endif%}
               {% if perms.home.delete_customer %}
               <button class="btn btn-danger delete-customer fs-6" data-customer-id="{{ data.id }}">
-                Delete
+               <i class="ti-trash"></i> Delete
               </button>
               {% else %}
               <p>No delete permission </p>

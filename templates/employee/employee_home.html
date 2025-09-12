@@ -25,10 +25,10 @@ Employees {% endblock title %}
     <h2 class="text-center alert alert-info">Employees List</h2>
     <div class="">
       {% if perms.home.add_employee %}
-      <a href="{% url 'addemployee' %}" class=" fs-6 btn btn-primary col-md-2 ">Add Employee</a>
+      <a href="{% url 'addemployee' %}" class=" fs-6 btn btn-primary col-md-2 "><ii class="ti-plus me-3"></ii> Employee</a>
       {% endif %}
       
-      <div class="table-responsive py-2">
+      <div class="table-responsive py-2 mt-3">
         {% if employees%}
         <table class="table table-flush" id="datatable">
           <thead class="thead-light">
@@ -37,18 +37,21 @@ Employees {% endblock title %}
                 Sr#
               </th>
               <th class="border-bottom fw-bolder text-center fs-5" scope="col">
+                ID
+              </th>
+              <th class="border-bottom fw-bolder text-center fs-5" scope="col">
                 Name
               </th>
 
               <th class="border-bottom fw-bolder text-center fs-5" scope="col">
-               
-                Job
+              
+                Designation
               </th>
               <th class="border-bottom fw-bolder text-center fs-5" scope="col">
                 Contact
               </th>
               <th class="border-bottom fw-bolder text-center fs-5" scope="col">
-               
+              
                 Adress
               </th>
               <th class="border-bottom fw-bolder text-center fs-5" scope="col">
@@ -61,17 +64,19 @@ Employees {% endblock title %}
             <tr id="employee-{{ employee.id }}">
               <td class="text-center fs-5">{{ forloop.counter }}</td>
             
+              <td class="text-center fs-5">{{ employee.id }}</td>
               <td class="text-center fs-5">{{ employee.name|capitalize_after_space }}</td>
-              <td class="text-center fs-5">{{ employee.job|title }}</td>
+              <td class="text-center fs-5">{{ employee.designation|title }}</td>
               <td class="text-center fs-5">{{ employee.contact }}</td>
-              <td class="text-center fs-5">{{ employee.adress|title }}</td>
+              <td class="text-center fs-5">{{ employee.address|title }}</td>
 
               
               
               <td class="text-center ">
-                <a class="btn btn-warning fs-5" href="{% url 'editemployee' employee.id %}">Edit</a>
+                <a class="btn btn-info fs-5 " href="{% url 'employeesdetail' employee.id %}"><ii class="ti-info-alt me-2"></ii>Info</a>
+                <a class="btn btn-warning fs-5 text-light" href="{% url 'editemployee' employee.id %}"><ii class="ti-pencil-alt me-1"></ii>Edit</a>
                 <button class="btn btn-danger fs-5 delete-employee" data-employee-id="{{ employee.id }}">
-                  Delete
+                  <ii class="ti-trash me-1"></ii>Del
                 </button>
               </td>
             </tr>

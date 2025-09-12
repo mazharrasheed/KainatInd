@@ -17,16 +17,21 @@ Gatepas {% endblock title %}
         <div class="page-body">
           <div class="row">
     {% include 'stock_finished_product/product_menu.html' %}
-    <div class="col-5 ">
+    <div class="col-12 ">
       <h3 class="text-center alert alert-info">Add Product</h3>
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{form|crispy}}
-        <!-- <div class="form-group">
-          <label class="fs-5" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
-          {{ form.category }}
-        </div> -->
-
+       <div class="row">
+                  {% for field in form %}
+                  <div class="col-md-3 mb-5">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-danger">{{ field.errors }}</div>
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+                </div>
         <input type="submit" class="btn btn-success" {% if update %} value="Update Product" {% else %}
           value="Add Product" {%endif %}>
         <a href="/finished_product/" class="btn btn-warning">Products</a>
@@ -35,79 +40,7 @@ Gatepas {% endblock title %}
     </div>
   </div>
 
-  <div class="col-12 text-center mt-5">
-    <h3 class="text-center alert alert-info">Products List</h3>
-
-    {% if mydata %}
-    <table class="table table-stripped table-bordered" id="petrol-table">
-      <colgroup>
-        <col width="5%">
-        <col width="15%">
-        <col width="15%">
-        <col width="15%">
-        <col width="15%">
-        <col width="15%">
-        {% if perms.home.change_product or perms.home.delete_product %}
-        {% if update %} {% else %}
-        <col width="20%"> {% endif %}
-        {% endif %}
-      </colgroup>
-      <thead>
-        <tr class="bg-primary bg-gradient text-light text-center">
-          <td class="text-center fs-5">Sr.No.</td>
-          <td class="text-center fs-5">Category</td>
-          <td class="text-center fs-5">Name</td>
-          <td class="text-center fs-5">Size</td>
-          <td class="text-center fs-5">Quantity</td>
-          <td class="text-center fs-5">Product Status</td>
-          {% if perms.home.change_product or perms.home.delete_product %}
-          {% if update %} {% else %}<td class="text-center fs-5">Action</td> {% endif %}
-          {% endif %}
-
-        </tr>
-      </thead>
-      <tbody>
-
-        {% if update %}
-        <tr>
-          <td class="text-center">{{mydata.id}}</td>
-          <td class="text-center">{{mydata.category}}</td>
-          <td class="">{{mydata.productname|capitalize_after_space}}</td>
-          <td class="text-center">{{mydata.product_size}}</td>
-          <td class="text-center">{{mydata.product_quantity}}</td>
-          <td class="text-center">{% if mydata.product_status %} Active {% else %} Inactive {% endif %} </td>
-        </tr>
-        {% else %}
-        {% for data in mydata %}
-        <tr>
-          <td class="text-center fs-5">{{forloop.counter}}</td>
-          <td class="text-center fs-5">{{data.category}}</td>
-          <td class=" fs-5">{{data.productname|capitalize_after_space}}</td>
-          <td class="text-center fs-5">{{data.product_size}}</td>
-          <td class="text-center fs-5"> {% if data.product_quantity %}
-
-            {{data.product_quantity}} {% else %} - {% endif %} </td>
-          <td class="text-center fs-5">{% if data.product_status %} Active {% else %} Inactive {% endif %} </td>
-
-          {% if perms.home.change_product %}
-          <td class="text-center">
-            <a class="btn btn-sm btn-warning fs-5" href={% url 'editfinishedproduct' id=data.id %}>Edit</a>
-            {% endif %}
-
-            {% if perms.home.delete_product %}
-            <a class=" btn btn-sm btn-danger fs-5" href={% url 'deletefinishedproduct' id=data.id %}>Delete</a>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-        {% endif %}
-      </tbody>
-    </table>
-    {% else %}
-    <h4 class="text-center alert alert-warning">No Record Found</h4>
-    {% endif %}
-  </div>
-</div>
+  
 <script>
   $(document).ready(function () {
 

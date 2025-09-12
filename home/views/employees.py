@@ -16,6 +16,14 @@ def employees(request):
     return render(request,"employee/employee_home.html",data)   
 
 @login_required
+@permission_required('home.view_employee', login_url='/login/')
+def employees_detail(request,id):
+
+    employee=Employee.objects.get(is_deleted=False,id=id)
+    data={'employee':employee}
+    return render(request,"employee/employee_detail.html",data)   
+
+@login_required
 @permission_required('home.add_employee', login_url='/login/')
 def add_employee(request):
 
