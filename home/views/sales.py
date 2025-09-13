@@ -87,7 +87,7 @@ from ..forms import Sales_ReceiptForm, Sales_Receipt_ProductForm
 from ..models import Sales_Receipt, Sales_Receipt_Product, Final_Product, Final_Product_Price
 
 @login_required
-# @permission_required('sale.add_sales_receipt', login_url='/login/')
+@permission_required('home.add_sales_receipt', login_url='/login/')
 def create_salereceipt(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         if 'finalize' in request.POST:
@@ -160,61 +160,84 @@ def create_salereceipt(request):
 
 
 
-
 @login_required
 @permission_required('home.change_sales_receipt', login_url='/login/')
-def edit_salereceipt(request,id):
-    salercpt = get_object_or_404(Sales_Receipt, id=id)
-    products = Sales_Receipt_Product.objects.filter(salereceipt=salercpt.id)
-    if request.method == 'POST':
-        form = Sales_ReceiptForm(request.POST, instance=salercpt)
-        if form.is_valid():
-            grn = form.save()
-            customer=form.cleaned_data.get('customer_name')
-            product_data = request.POST.getlist('products[]')
-            deleted_products = request.POST.getlist('deleted_products[]')
-            # Delete removed products
-            Sales_Receipt_Product.objects.filter(salereceipt=salercpt, product__id__in=deleted_products).delete()
-            product_quantities = defaultdict(int)
-            for product_info in product_data:
-                try:
-                    product_id, quantity = product_info.split(':')
-                    product_quantities[product_id] += int(quantity)
-                except ValueError:
-                    return JsonResponse({'success': False, 'message': 'Invalid product data.'})
+def edit_salereceipt(request, id):
+    salereceipt = get_object_or_404(Sales_Receipt, pk=id)
 
-            for product_id, total_quantity in product_quantities.items():
-                try:
-                    product_instance = Product.objects.get(id=product_id)
-                    product=Product.objects.get(id=product_id)
-                    unit_price_cust=Product_Price.objects.get(is_deleted=False,customer=customer,product=product)
-                    quantity=int(quantity)
-                    unit_price = float(unit_price_cust.price)
-                    amount=unit_price*quantity
-                    product, created = Sales_Receipt_Product.objects.update_or_create(
-                        salereceipt=salercpt,
-                        product=product_instance,
-                        defaults={
-                            'quantity': total_quantity,
-                            'unit_price': float(unit_price),
-                            'amount': float(amount),
-                        }
-                    )
-                    Product.objects.get(id=product_id).change_status()
-                except Product.DoesNotExist:
-                    return JsonResponse({'success': False, 'message': f'Product with ID {product_id} does not exist.'})
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if 'finalize' in request.POST:
+            form_salereceipt = Sales_ReceiptForm(request.POST, instance=salereceipt)
+            products = request.POST.getlist('products[]')
 
-            return JsonResponse({'success': True, 'redirect_url': '/list-sales?customer=True'})
+            if form_salereceipt.is_valid() and products:
+                salereceipt = form_salereceipt.save(commit=False)
+                salereceipt.created_by = request.user
+                salereceipt.save()
 
-        return JsonResponse({'success': False, 'message': 'Invalid form submission.'})
+                customer = form_salereceipt.cleaned_data.get('customer_name')
+                region = form_salereceipt.cleaned_data.get('region')
 
-    context = {
-        'salereceipt': salercpt,
-        'products': products,
-        'form_salereceipt': Sales_ReceiptForm(instance=salercpt),
-        'form': Sales_Receipt_ProductForm(),
-    }
-    return render(request, 'sale/edit_salereceipt.html', context)
+                # clear old products
+                salereceipt.sales_receipt_products.all().delete()
+
+                for product_data in products:
+                    try:
+                        product_id, quantity = product_data.split(':')
+                        product = get_object_or_404(Final_Product, id=product_id)
+
+                        # Find price (customer first, then region)
+                        unit_price_obj = None
+                        if customer:
+                            unit_price_obj = Final_Product_Price.objects.filter(
+                                is_deleted=False,
+                                customer=customer,
+                                product=product
+                            ).first()
+                        if not unit_price_obj and region:
+                            unit_price_obj = Final_Product_Price.objects.filter(
+                                is_deleted=False,
+                                region=region,
+                                product=product
+                            ).first()
+
+                        if not unit_price_obj:
+                            return JsonResponse({
+                                'success': False,
+                                'errors': f'No price defined for product {product.productname}'
+                            })
+
+                        quantity = int(quantity)
+                        unit_price = float(unit_price_obj.price)
+                        amount = unit_price * quantity
+
+                        Sales_Receipt_Product.objects.create(
+                            salereceipt=salereceipt,
+                            product=product,
+                            quantity=quantity,
+                            unit_price=unit_price,
+                            amount=amount
+                        )
+
+                        product.change_status()
+
+                    except Exception as e:
+                        return JsonResponse({'success': False, 'errors': str(e)})
+
+                return JsonResponse({'success': True, 'redirect_url': '/list-sales?customer=True'})
+            else:
+                return JsonResponse({'success': False, 'errors': form_salereceipt.errors.as_json()})
+
+    else:
+        form = Sales_Receipt_ProductForm()
+        form_salereceipt = Sales_ReceiptForm(instance=salereceipt)
+
+    return render(request, 'sale/edit_salereceipt.html', {
+        'form': form,
+        'form_salereceipt': form_salereceipt,
+        'salereceipt': salereceipt,
+    })
+
 
 @login_required
 @permission_required('home.delete_sales_receipt', login_url='/login/')

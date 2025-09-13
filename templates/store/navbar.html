@@ -176,6 +176,41 @@
                   </li>
                   {% endif %}
 
+               {% if perms.home.view_final_product_price %}
+                  <li class=" {% if request.path == '/list_product_price/' %} color-info {% endif %} ">
+                    <a href="/list_product_price/">
+                      <span class="pcoded-micon"><i class="ti-view-list-alt"></i><b>D</b></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
+                        <h5>Price List</h5>
+                      </span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+               {% if perms.home.view_final_product_price %}
+                  <li class=" {% if request.path == '/list_product_price/?region=True' %} color-info {% endif %} ">
+                    <a href="/list_product_price/?region=True">
+                      <span class="pcoded-micon"><i class="ti-view-list-alt"></i><b>D</b></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
+                        <h5>Regionl Price List</h5>
+                      </span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}    
+               {% if perms.home.view_final_product_price %}
+                  <li class=" {% if request.path == '/list_product_price/?customer=True' %} color-info {% endif %} ">
+                    <a href="/list_product_price/?customer=True">
+                      <span class="pcoded-micon"><i class="ti-view-list-alt"></i><b>D</b></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
+                        <h5>Customer Price List</h5>
+                      </span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}    
+     
               {% if perms.home.view_employee %}
                   <li class=" {% if request.path == '/inventory/' %} color-info {% endif %} ">
                     <a href="/inventory/">

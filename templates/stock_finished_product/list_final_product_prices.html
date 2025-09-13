@@ -21,7 +21,7 @@
                         {% if prices %}
                         <div id="product" class="col-md-12">
                             <h3 class="">Product {% if customer %}
-                                Customer {% else %}Rigional
+                                Customer {% elif region %}Rigional {% else%}
                             {% endif %}  Prices</h3>
                         </div>
                         <div class="card py">

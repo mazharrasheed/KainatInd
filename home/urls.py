@@ -126,6 +126,7 @@ urlpatterns = [
     path('create-salereceipt/', sales.create_salereceipt, name='create_salereceipt'),
     path('create-salereceipt/<int:salereceipt_id>/', sales.create_salereceipt, name='create_salereceipt'),
     path('edit-salereceipt/<int:id>/', sales.edit_salereceipt, name='edit_salereceipt'),
+    
     path('create-cash-salereceipt/', sales.create_cash_salereceipt, name='create_cash_salereceipt'),
     path('create-cash-salereceipt/<int:salereceipt_id>/', sales.create_cash_salereceipt, name='create_cash_salereceipt'),
     path('edit-cash-salereceipt/<int:id>/', sales.edit_cash_salereceipt, name='edit_cashsale_receipt'),

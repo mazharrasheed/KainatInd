@@ -279,7 +279,7 @@ class Sales_Receipt(models.Model):
         return f"Sale Receipt {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
 
 class Sales_Receipt_Product(models.Model):
-    salereceipt = models.ForeignKey(Sales_Receipt, on_delete=models.RESTRICT)
+    salereceipt = models.ForeignKey(Sales_Receipt, on_delete=models.RESTRICT,related_name="sales_receipt_products")
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
     quantity = models.PositiveIntegerField()
     unit_price = models.FloatField()

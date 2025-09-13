@@ -73,228 +73,162 @@ Edit Customer Slae Receipt
 </style>
 
 <div class="pcoded-content">
-	<div class="pcoded-inner-content">
-		<div class="main-body">
-			<div class="page-wrapper">
-				<div class="page-body">
-					<div class="table-container">
-						<h3 class="text-center bg-dark text-light p-3">
-							Edit Customer Receipt
-						</h3>
-						<form id="salereceipt-form" method="POST">
-							{% csrf_token %}
-							<div class="header-section">
-								<div>
-									<h4>MASH Systems</h4>
-									<h6>Gujranwala</h6>
-									<h6>Cell: 0301-8742840</h6>
-								</div>
-								<div style="margin-right:50px;width:500px">
-									<p><strong>Date:</strong> Auto</p>
-									<p style="margin-top:10px"><span class="ghfghg">{{ form_salereceipt.customer_name|as_crispy_field }}</span>
-									</p>
-									
+  <div class="pcoded-inner-content">
+    <div class="main-body">
+      <div class="page-wrapper">
+        <div class="page-body">
+          <div class="table-container">
+            <h3 class="text-center bg-dark text-light p-3">Edit Customer Sale Receipt</h3>
+            <form id="salereceipt-form" method="POST">
+              {% csrf_token %}
+              <div class="header-section">
+                <div>
+                  <h4>MASH Systems</h4>
+                  <h6>Gujranwala</h6>
+                  <h6>Cell: 0301-8742840</h6>
+                </div>
+                <div style="margin-right:50px; width:500px">
+                  <p><strong>Date:</strong> {{ salereceipt.date_created|date:"Y-m-d H:i" }}</p>
+                  <p>{{ form_salereceipt.customer_name|as_crispy_field }}</p>
+                  <p>{{ form_salereceipt.region|as_crispy_field }}</p>
+                </div>
+              </div>
 
-								</div>
-							</div>
-							<table>
-								<thead>
-									<tr>
-										<td>{{ form.product|as_crispy_field }}</td>
-										<td id="in_stock">In_Stock</td>
-										<td>{{ form.quantity|as_crispy_field }}</td>
-										<td>auto</td>
-										<td id="amount">Auto</td>
+              <table>
+                <thead>
+                  <tr>
+                    <td>{{ form.product|as_crispy_field }}</td>
+                    <td id="in_stock">In Stock</td>
+                    <td>{{ form.quantity|as_crispy_field }}</td>
+                    <td>Unit Price (Auto)</td>
+                    <td id="amount">Auto</td>
+                    <td><button id="add-product" class="btn btn-primary" type="button">Add Product</button></td>
+                  </tr>
+                  <tr>
+                    <th>Product</th>
+                    <th>In Stock</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="product-list">
+                  {% for sp in salereceipt.sales_receipt_products.all %}
+                  <tr>
+                    <td>{{ sp.product.productname }}</td>
+                    <td>-</td>
+                    <td>{{ sp.quantity }}</td>
+                    <td>{{ sp.unit_price }}</td>
+                    <td>{{ sp.amount }}</td>
+                    <td><button type="button" class="delete-product btn btn-danger" data-id="{{ sp.product.id }}">Delete</button></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
 
-										<td>
-											<button id="add-product" class="btn btn-primary" type="button">Add Product</button>
-										</td>
-									</tr>
-									<tr>
-										<th>Product</th>
-
-										<th>In_stock</th>
-										<th>Quantity</th>
-										<th>Unit Price</th>
-										<th>Amount</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody id="product-list">
-									{% for product in products %}
-									<tr>
-										<td>{{ product.product }}</td>
-										<td>-</td>
-										<td>{{ product.quantity }}</td>
-										<td>{{ product.unit_price }}</td>
-										<td>{{ product.amount }}</td>
-
-										<td>
-											<button class="delete-product btn btn-danger" data-product-id="{{ product.product.id }}">
-												Delete
-											</button>
-										</td>
-									</tr>
-									{% endfor %}
-								</tbody>
-							</table>
-							<button id="update-salereceipt" class="btn btn-success mt-4">
-								Update Cash Receipt
-							</button>
-							<a href="/list-sales?cash=True" class="btn btn-warning mt-4">Cancel Update Cash Receipt</a>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+              <button id="finalize-receipt" class="btn btn-success">Update Receipt</button>
+              <a href="/list-sales?customer=True" class="btn btn-warning">Cancel</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-	// Initialize productList with existing products from the template
-	let productList = [
-		{% for product in products %}
-	{ product: '{{ product.product.id }}', quantity: '{{ product.quantity }}', unit_price: '{{ product.unit_price }}', amount: '{{ product.amount }}' },
-	{% endfor %}
-  ];
+$(document).ready(function () {
+  let productList = [];
 
+  // preload existing products
+  {% for sp in salereceipt.sales_receipt_products.all %}
+    productList.push({ product: "{{ sp.product.id }}", quantity: "{{ sp.quantity }}" });
+  {% endfor %}
 
-	$('#id_product').on('change', (e) => {
-		console.log(e.target.value)
-		$.ajax({
-			url: `/get-stock/${e.target.value}`,
-			method: 'get',
-			success: function (data) {
-				if (data.success) {
-					console.log("response data", data)
-					$('#in_stock').text(`${data.stock}`)
-				}
-				else {
-					alert('Failed to get stock.');
-				}
-			},
-			error: function (error) {
-				console.error('Error:', error);
-			}
-		});
-	})
+  // stock check
+  $("#id_product").on("change", (e) => {
+    $.ajax({
+      url: `/get-stock-final-product/${e.target.value}`,
+      method: "GET",
+      success: function (data) {
+        $("#in_stock").text(data.success ? data.stock : "N/A");
+      }
+    });
+  });
 
-	// Initialize a list to track deleted products
-	let deletedProducts = [];
-	// Add product event listener
-	$('#add-product').on('click', function () {
-		const product = $('select[name="product"]').val();
-		const quantity = $('input[name="quantity"]').val();
+  // add product
+  $("#add-product").on("click", function () {
+    const product = $('#id_product').val();
+    const productText = $('#id_product option:selected').text();
+    const quantity = $('#id_quantity').val();
+    const in_stock = parseInt($("#in_stock").text() || 0);
 
-		if (!product) {
-			alert('Please select a product.');
-			return;
-		}
-		if (!quantity || quantity <= 0) {
-			alert('Please enter a valid quantity.');
-			return;
-		}
+    if (!product) { alert("Please select a product."); return; }
+    if (!quantity || quantity <= 0) { alert("Enter a valid quantity."); return; }
+    if (quantity > in_stock) { alert("Quantity exceeds stock."); return; }
 
-		
-		// Check if product is already in productList
-		const existingProduct = productList.find(item => item.product === product);
-		if (existingProduct) {
-			alert('This product has already been added.');
-			return;
-		}
+    if (productList.some(p => p.product === product)) {
+      alert("This product already added.");
+      return;
+    }
 
-		const in_stock = parseInt($('#in_stock').text(), 10); // Parse text to an integer
-		const qty = parseInt(quantity, 10); // Parse quantity to integer
-		if (in_stock < qty) {
-			alert(`Select a quantity less than or equal to In Stock. In Stock: ${in_stock}, Requested: ${qty}`);
-			return;
-		}
+    productList.push({ product, quantity });
+    const row = `<tr>
+      <td>${productText}</td>
+      <td>-</td>
+      <td>${quantity}</td>
+      <td>Auto</td>
+      <td>Auto</td>
+      <td><button type="button" class="delete-product btn btn-danger" data-id="${product}">Delete</button></td>
+    </tr>`;
+    $("#product-list").append(row);
+  });
 
-		productList.push({ product: product, quantity: quantity,});
-		const row = `
-        <tr>
-            <td>${$('select[name="product"] option:selected').text()}</td>
+  // delete product
+  $("#product-list").on("click", ".delete-product", function () {
+    const pid = $(this).data("id");
+    productList = productList.filter(p => p.product !== String(pid));
+    $(this).closest("tr").remove();
+  });
 
-            <td id="in_stock">-</td>
-            <td>${quantity}</td>
-            <td>auto</td>
-            <td>auto</td>
-            <td>
-                <button class="delete-product btn btn-danger" data-product-id="${product}">Delete</button>
-            </td>
-        </tr>
-    `;
-		$('#product-list').append(row);
+  // finalize update
+  $("#finalize-receipt").on("click", function (e) {
+    e.preventDefault();
 
-		// Clear fields using jQuery
-		$('select[name="product"]').val(""); // Reset the dropdown
-		$('input[name="quantity"]').val("1"); // Reset the quantity input
-		
-	});
+    if (productList.length === 0) {
+      alert("Please add at least one product.");
+      return;
+    }
+    if (!$('#id_customer_name').val() && !$('#id_region').val()) {
+      alert("Please select either a Customer or a Region.");
+      return;
+    }
 
+    const form = $("#salereceipt-form")[0];
+    const formData = new FormData(form);
+    productList.forEach(p => {
+      formData.append("products[]", `${p.product}:${p.quantity}`);
+    });
+    formData.append("finalize", true);
 
-	// Delete product event listener
-	document.getElementById('product-list').addEventListener('click', function (event) {
-		if (event.target.classList.contains('delete-product')) {
-			const productId = event.target.getAttribute('data-product-id');
-			// Add product to the deleted list
-			if (!deletedProducts.includes(productId)) {
-				deletedProducts.push(productId);
-			}
-			productList = productList.filter(item => item.product !== productId);
-			event.target.closest('tr').remove();
-		}
-	});
-
-	// Update salereceipt event listener
-	document.getElementById('update-salereceipt').addEventListener('click', function (event) {
-		event.preventDefault();
-
-		if (productList.length === 0) {
-			alert('Please check your product list is empty.');
-			return;
-		}
-
-		const form = document.getElementById('salereceipt-form');
-		const formData = new FormData(form);
-
-		// Append all product information to the form
-		productList.forEach(product => {
-			formData.append('products[]', `${product.product}:${product.quantity}`);
-		});
-
-		// Send list of deleted product IDs
-		deletedProducts.forEach(productId => {
-			formData.append('deleted_products[]', productId);
-		});
-
-		fetch(form.action, {
-			method: 'POST',
-			body: formData,
-			headers: {
-				'X-Requested-With': 'XMLHttpRequest',
-				'X-CSRFToken': '{{ csrf_token }}',
-			}
-		})
-			.then(response => response.json().catch(() => {
-				throw new Error('Invalid JSON response from server.');
-			}))
-			.then(data => {
-				if (data.success) {
-					if (data.redirect_url) {
-						window.location.href = data.redirect_url;
-					} else {
-						alert('Update successful, but no redirect URL provided.');
-					}
-				} else {
-					alert(data.message || 'Failed to update Sale Receipt.');
-				}
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				alert('An unexpected error occurred.');
-			});
-	});
+    $.ajax({
+      url: form.action,
+      method: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      success: function (data) {
+        if (data.success) {
+          window.location.href = data.redirect_url;
+        } else {
+          alert("Error: " + JSON.stringify(data.errors));
+        }
+      }
+    });
+  });
+});
 </script>
-
 {% endblock body %}
