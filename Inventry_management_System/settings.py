@@ -124,7 +124,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-#added Manualy
+# added Manualy
 
 # This is where collectstatic will put all static files
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
@@ -178,4 +178,4 @@ MEDIA_URL='/images/uploaded/'
 
 MEDIA_ROOT=BASE_DIR
 
-ALLOWED_HOSTS = ["kainatind.pythonanywhere.com"]
+ALLOWED_HOSTS = ["kainatind.pythonanywhere.com",'127.0.0.1']
