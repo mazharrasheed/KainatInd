@@ -20,7 +20,7 @@ def list_final_product_note(request):
     product_notes=Final_Product_Note.objects.all().order_by('-id')
 
     data={'product_notes':product_notes}
-    
+
     return render(request, 'final_product_note/list_final_pro_note.html',data)
 
 
@@ -39,11 +39,15 @@ def create_final_product_note(request):
 
                 for product_data in products:
                     product_id, quantity = product_data.split(":")
-                    Final_Product_Note_Product.objects.create(
+                    pro=Final_Product_Note_Product.objects.create(
                         final_product_note=note,
                         product_id=product_id,
                         quantity=quantity,
                     )
+
+                    Final_Product.objects.get(id=product_id).change_status()
+
+
 
                 return JsonResponse({"success": True, "redirect_url": "/list-final-pro-note/"})
             else:

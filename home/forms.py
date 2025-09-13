@@ -42,46 +42,46 @@ class Create_User_Form(UserCreationForm):
         self.helper.form_action = ''
         self.helper.layout = Layout(
             Fieldset(
-                'Create User',   
+                'Create User',
             ),
             Field('username','group','password1','password2', css_class="mb-3", css_id="custom_field_id",),
-            Submit('submit', 'Create User', css_class='btn btn-info mt-3'), 
+            Submit('submit', 'Create User', css_class='btn btn-info mt-3'),
         )
 
 
 class RegionForm(forms.ModelForm):
-    
+
     class Meta:
         model = Region
         fields = ['name']
 
 class CopanyForm(forms.ModelForm):
-    
+
     class Meta:
         model = Company
         fields = ['name']
 
 class CategoryForm(forms.ModelForm):
-    
+
     class Meta:
         model = Category
         fields = ['name']
-        
+
 class Finish_Product_CategoryForm(forms.ModelForm):
-    
+
     class Meta:
         model = Finish_Product_Category
         fields = ['name']
 
 # class Finished_product_Form(forms.ModelForm):
-    
+
 #     class Meta:
 #         model = Finish_Product
 #         fields = ['name','size','weight']
 #         labels={'name':'Product Name','size':'Sizes','weight':'Weight in Kgs',}
 
 class CategoryForm(forms.ModelForm):
-    
+
     class Meta:
         model = Category
         fields = ['name']
@@ -94,19 +94,19 @@ class Finish_ProductForm(forms.ModelForm):
         fields = ['productname','unit','category','company','purchase','sale_rate','labour' ]
         labels={'productname':'Product Name','sale_rate':'Slae Rate'
                 }
-        
+
         widgets = {
 
             # 'product_weight': forms.TextInput(attrs={'placeholder': 'Enter product weight'}),
             # 'pro_img': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             # 'product_status': forms.CheckboxInput(),
-            
+
         }
 
     def __init__(self, *args, **kwargs):
         super(Finish_ProductForm, self).__init__(*args, **kwargs)
-        
-        
+
+
         placeholders = {
             'productname': 'Enter product name',
             'unit':'Select Unit',
@@ -121,10 +121,10 @@ class Finish_ProductForm(forms.ModelForm):
         for field_name in self.fields:
             self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
-            
+
         self.fields['category'].empty_label = "Select"
         self.fields['company'].empty_label = "Select"
-       
+
 
 class ProductForm(forms.ModelForm):
     # unit = forms.ModelChoiceField(queryset=Unit.objects.all(), empty_label="Select Unit")
@@ -134,7 +134,7 @@ class ProductForm(forms.ModelForm):
         fields = [ 'productname','unit','category','final_product_group','default_store','stockable','rate','labour','weight','stock']
         labels={'productname':'Product Name',
                 'product_status':'Product_Status'}
-        
+
         widgets = {
 
             'product_weight': forms.TextInput(attrs={'placeholder': 'Enter product weight'}),
@@ -142,17 +142,17 @@ class ProductForm(forms.ModelForm):
                 choices=[(True, "Yes"), (False, "No")],
                 attrs={"class": "form-select"}
             ),
-            
+
         }
 
     def __init__(self, *args, **kwargs):
         super(ProductForm, self).__init__(*args, **kwargs)
-        
-        
+
+
         placeholders = {
             'productname': 'Enter product name',
             'unit':'Select Unit',
-            'weight':'Enter product weight',   
+            'weight':'Enter product weight',
         }
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
@@ -161,7 +161,7 @@ class ProductForm(forms.ModelForm):
         for field_name in self.fields:
             self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
-            
+
         self.fields['category'].empty_label = "Select"
         self.fields['final_product_group'].empty_label = "Select"
         self.fields['default_store'].choices = [('', 'Select')] + list(self.fields['default_store'].choices)
@@ -282,11 +282,11 @@ class GatePassForm(forms.ModelForm):
 
 
 class GatePassProductForm(forms.ModelForm):
-    
+
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     remarks = forms.CharField( label='Remarks',required=False)
-    
+
     class Meta:
         model = GatePassProduct
         fields = ['product', 'quantity','remarks']
@@ -324,12 +324,12 @@ class Store_Issue_Request_Form(forms.ModelForm):
 
 
 class Store_Issue_Request_ProductForm(forms.ModelForm):
-    
+
     # product = forms.ModelChoiceField(queryset=Product.objects.filter(inventory__quantity__gt=0).distinct(), empty_label="Select Product")
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False,product_status=True), empty_label="Select Product")
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     # unit_price = forms.FloatField( label='Unit Price',required=False)
-    
+
     class Meta:
         model = Store_Issue_Request_Product
         fields = ['product', 'quantity']
@@ -345,7 +345,7 @@ class Store_Issue_Request_ProductForm(forms.ModelForm):
             if Store_Issue_Request_Product.objects.filter(store_issue_request=self.salereceipt, product=product).exists():
                 self.add_error('product', f'The product "{product}" has already been added to this gate pass.')
         return cleaned_data
-    
+
 
 class Store_issue_Form(forms.ModelForm):
     project = forms.ModelChoiceField(
@@ -365,12 +365,12 @@ class Store_issue_Form(forms.ModelForm):
 
 
 class Store_Issue_ProductForm(forms.ModelForm):
-    
+
     # product = forms.ModelChoiceField(queryset=Product.objects.filter(inventory__quantity__gt=0).distinct(), empty_label="Select Product")
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False,product_status=True), empty_label="Select Product")
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     # unit_price = forms.FloatField( label='Unit Price',required=False)
-    
+
     class Meta:
         model = Store_Issue_Product
         fields = ['product', 'quantity']
@@ -386,7 +386,7 @@ class Store_Issue_ProductForm(forms.ModelForm):
             if Store_Issue_Product.objects.filter(store_issue_request=self.salereceipt, product=product).exists():
                 self.add_error('product', f'The product "{product}" has already been added to this gate pass.')
         return cleaned_data
-    
+
 class FinalProductNoteForm(forms.ModelForm):
     class Meta:
         model = Final_Product_Note
@@ -394,6 +394,12 @@ class FinalProductNoteForm(forms.ModelForm):
 
 
 class FinalProductNoteProductForm(forms.ModelForm):
+
+    product = forms.ModelChoiceField(
+        queryset=Final_Product.objects.filter(is_deleted=False,),
+        empty_label="Select Product"
+    )
+
     class Meta:
         model = Final_Product_Note_Product
         fields = ['product', 'quantity']
@@ -428,7 +434,7 @@ class Store_Purchase_ProductForm(forms.ModelForm):
 
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     # unit_price = forms.FloatField( label='Unit Price',required=False)
-    
+
     class Meta:
         model = Store_Purchase_Product
         fields = ['product', 'quantity']
@@ -436,7 +442,7 @@ class Store_Purchase_ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.salereceipt = kwargs.pop('salereceipt', None)
         super(Store_Purchase_ProductForm, self).__init__(*args, **kwargs)
-        
+
 
     def clean(self):
         cleaned_data = super().clean()
@@ -445,7 +451,7 @@ class Store_Purchase_ProductForm(forms.ModelForm):
             if Store_Purchase_Product.objects.filter(store_purchase_note=self.salereceipt, product=product).exists():
                 self.add_error('product', f'The product "{product}" has already been added to this Purchase note.')
         return cleaned_data
-    
+
 class Sales_ReceiptForm(forms.ModelForm):
     customer_name = forms.ModelChoiceField(
         queryset=Customer.objects.filter(is_deleted=False),
@@ -481,7 +487,7 @@ class Sales_ReceiptForm(forms.ModelForm):
 
 class Sales_Receipt_ProductForm(forms.ModelForm):
     product = forms.ModelChoiceField(
-        queryset=Final_Product.objects.filter(is_deleted=False),
+        queryset=Final_Product.objects.filter(is_deleted=False,product_status=True),
         empty_label="Select Product"
     )
     quantity = forms.IntegerField(min_value=1, initial=1, label="Quantity")
@@ -515,7 +521,7 @@ class Sales_Receipt_ProductForm(forms.ModelForm):
 #     product = forms.ModelChoiceField(queryset=Final_Product.objects.filter(is_deleted=False), empty_label="Select Product")
 #     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
 #     # unit_price = forms.FloatField( label='Unit Price',required=False)
-    
+
 #     class Meta:
 #         model = Sales_Receipt_Product
 #         fields = ['product', 'quantity']
@@ -549,7 +555,7 @@ class Sales_Cash_Receipt_ProductForm(forms.ModelForm):
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False,product_status=True), empty_label="Select Product")
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
     unit_price = forms.FloatField( label='Unit Price',required=True)
-    
+
     class Meta:
         model = Sales_Receipt_Product
         fields = ['product', 'quantity','unit_price']
@@ -565,7 +571,7 @@ class Sales_Cash_Receipt_ProductForm(forms.ModelForm):
             if Sales_Receipt_Product.objects.filter(salereceipt=self.salereceipt, product=product).exists():
                 self.add_error('product', f'The product "{product}" has already been added to this gate pass.')
         return cleaned_data
-    
+
 
 class Sign_Up(UserCreationForm):
 
@@ -591,15 +597,15 @@ class Sign_Up(UserCreationForm):
         self.helper.form_action = ''
         self.helper.layout = Layout(
             Fieldset(
-                'Sign Up',   
+                'Sign Up',
             ),
             Field('username','password1','password2', css_class="mb-3", css_id="custom_field_id",),
-        
-            Submit('submit', 'SignUp', css_class='btn btn-info mt-3'), 
+
+            Submit('submit', 'SignUp', css_class='btn btn-info mt-3'),
         )
 
 class Add_Blog(forms.ModelForm):
-    
+
     class Meta:
         model = Blog
         fields = ('title','description')
@@ -610,9 +616,9 @@ class EditUserPrifoleForm(UserChangeForm):
         model=User
         fields=['username','first_name','last_name','email',]
         labels={'email':'Email'}
-        
+
 class AdminUserPrifoleForm(UserChangeForm):
-    
+
     password=None
     class Meta:
         model=User
@@ -621,16 +627,16 @@ class AdminUserPrifoleForm(UserChangeForm):
 
 
 class Employee_form(forms.ModelForm):
-   
+
     class Meta:
         model = Employee
         fields = [ 'name','fname','cnic','designation','address','salary','instalment','type','order','contact']
         labels={'name':'Name', 'fname':'S/o','cnic':'CNIC #',
                 'contact':'Mobile'}
-        
+
         widgets = {
 
-            
+
         }
 
     def __init__(self, *args, **kwargs):
@@ -646,7 +652,7 @@ class Employee_form(forms.ModelForm):
             self.fields['designation'].choices = [('', 'Select')] + cleaned_choices
 
         placeholders = {
-            
+
             'name': 'Enter full name',
             'fname': 'Enter full father name',
             'cnic': 'xxxxxxxxxxxxx',
@@ -664,13 +670,13 @@ class Employee_form(forms.ModelForm):
 
 
 class Suppliers_form(forms.ModelForm):
-   
+
     class Meta:
         model = Suppliers
         fields = ['coname', 'name','contact','adress','description']
         labels={'coname':'Company Name','name':'Name',
                 'contact':'Contact','adress':'Adress','description':'Description',}
-        
+
         widgets = {
 
             # 'product_weight': forms.TextInput(attrs={'placeholder': 'Enter product weight'}),
@@ -690,7 +696,7 @@ class Suppliers_form(forms.ModelForm):
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
 
 class Customer_form(forms.ModelForm):
-   
+
     class Meta:
         model = Customer
         fields = ['coname', 'name','region','contact','address']
@@ -724,7 +730,7 @@ class Cheques_form(forms.ModelForm):
         widgets = {
             'cheque_date': forms.DateInput(attrs={'type': 'date'}),
         }
-  
+
     def __init__(self, *args, **kwargs):
         super(Cheques_form, self).__init__(*args, **kwargs)
         self.fields['cheque_number'].required = False
@@ -735,12 +741,12 @@ class Cheques_form(forms.ModelForm):
         }
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
-            
-      
-    
+
+
+
 
 class AccountForm(forms.ModelForm):
-    
+
     class Meta:
         model = Account
         fields = ['name','account_type','address','contact','mobile']
@@ -748,7 +754,7 @@ class AccountForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AccountForm, self).__init__(*args, **kwargs)
-        
+
         self.fields['account_type'].choices = [('', 'Select')] + list(self.fields['account_type'].choices)
         self.fields['name'].required = True
         choices = list(self.fields['account_type'].choices)
@@ -757,16 +763,16 @@ class AccountForm(forms.ModelForm):
         self.fields['account_type'].choices = [('', 'Select')] + choices
 
 class Employee_AccountForm(forms.ModelForm):
-    
+
     class Meta:
         model = Account
         fields = ['employee','account_type']
 
     def __init__(self, *args, **kwargs):
         super(Employee_AccountForm, self).__init__(*args, **kwargs)
-        
+
         self.fields['account_type'].choices = [('', 'Select')] + list(self.fields['account_type'].choices)
-        
+
         self.fields['employee'].empty_label = "Select"
         self.fields['employee'].required = True
         choices = list(self.fields['account_type'].choices)
@@ -775,14 +781,14 @@ class Employee_AccountForm(forms.ModelForm):
         self.fields['account_type'].choices = [('', 'Select')] + choices
 
 class Customer_AccountForm(forms.ModelForm):
-    
+
     class Meta:
         model = Account
         fields = ['customer','account_type']
 
     def __init__(self, *args, **kwargs):
         super(Customer_AccountForm, self).__init__(*args, **kwargs)
-        
+
         self.fields['account_type'].choices = [('', 'Select')] + list(self.fields['account_type'].choices)
         self.fields['customer'].empty_label = "Select"
         self.fields['customer'].required = True
@@ -793,14 +799,14 @@ class Customer_AccountForm(forms.ModelForm):
         self.fields['account_type'].choices = [('', 'Select')] + choices
 
 class Supplier_AccountForm(forms.ModelForm):
-    
+
     class Meta:
         model = Account
         fields = ['supplier','account_type']
 
     def __init__(self, *args, **kwargs):
         super(Supplier_AccountForm, self).__init__(*args, **kwargs)
-        
+
         self.fields['account_type'].choices = [('', 'Select')] + list(self.fields['account_type'].choices)
         self.fields['supplier'].empty_label = "Select"
         self.fields['supplier'].required = True
@@ -813,14 +819,14 @@ class Supplier_AccountForm(forms.ModelForm):
 
 
 class Cheque_AccountForm(forms.ModelForm):
-    
+
     class Meta:
         model = Account
         fields = ['cheque','balance','account_type']
 
     def __init__(self, *args, **kwargs):
         super(Cheque_AccountForm, self).__init__(*args, **kwargs)
-        
+
         self.fields['account_type'].choices = [('', 'Select')] + list(self.fields['account_type'].choices)
         self.fields['cheque'].empty_label = "Select"
         self.fields['cheque'].required = True
@@ -829,13 +835,13 @@ class Cheque_AccountForm(forms.ModelForm):
         choices = [(k, v) for k, v in choices if k != '']
 
         self.fields['account_type'].choices = [('', 'Select')] + choices
-        
+
 
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         fields = ['description', 'debit_account','credit_account','amount']
-    
+
     def __init__(self, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['debit_account'].empty_label = "Select"
@@ -849,7 +855,7 @@ class TransactionForm(forms.ModelForm):
             raise forms.ValidationError("Amount must be greater than zero.")
         return amount
 
-  
+
 
 class AccountStatementForm(forms.Form):
     account = forms.ModelChoiceField(

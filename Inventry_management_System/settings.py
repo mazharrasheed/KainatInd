@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'home.middleware.underconstruction.UnderConstructionMiddleWare',
+    # 'home.middleware.underconstruction.UnderConstructionMiddleWare',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
 ]
@@ -123,6 +124,16 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+#added Manualy
+
+# This is where collectstatic will put all static files
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# Extra locations (optional) where you put your own static files during dev
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -167,4 +178,4 @@ MEDIA_URL='/images/uploaded/'
 
 MEDIA_ROOT=BASE_DIR
 
-ALLOWED_HOSTS = ['192.168.2.13','192.168.0.105', 'localhost', '127.0.0.1','192.168.2.12','192.168.43.12']
+ALLOWED_HOSTS = ["kainatind.pythonanywhere.com"]

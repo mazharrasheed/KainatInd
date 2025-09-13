@@ -30,30 +30,30 @@ class CustomPermissions(models.Model):
 class Region(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
-    
+
 class Company(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
 class Project(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
-    
+
 class Finish_Product_Category(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
-    
+
 class Final_Product(models.Model):
         ACTIVE = 'Atcive'
         INACTIVE = 'Inactive'
@@ -76,32 +76,32 @@ class Final_Product(models.Model):
         purchase=models.FloatField(null=True,blank=True)
         sale_rate=models.FloatField(null=True,blank=True)
         labour=models.FloatField(null=True,blank=True)
-        product_status=models.BooleanField(default=True)
+        product_status=models.BooleanField(default=False)
         is_deleted = models.BooleanField(default=False)
         product_slug=AutoSlugField(populate_from="productname",unique=True,null=True,default=None)
         def __str__(self):
             return f"{self.productname}"
-        
+
         def get_price_for_customer(self, customer):
             # Get the price for this product for a specific customer
             try:
                 return self.final_produt_price.get(customer=customer).price
             except Product_Price.DoesNotExist:
-                return None    
+                return None
         def get_price_for_region(self, region):
             # Get the price for this product for a specific customer
             try:
                 return self.final_product_price.get(region=region).price
             except Product_Price.DoesNotExist:
-                return None    
-            
+                return None
+
         def get_current_stock(self):
             """Calculate the current stock of this product."""
             grn_total = Final_Product_Note_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
             sale_total = Sales_Receipt_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
             current_stock = grn_total - sale_total
             return current_stock
-    
+
         def change_status(self):
             """Calculate the current stock of this product."""
             current_stock = self.get_current_stock()
@@ -114,14 +114,14 @@ class Final_Product(models.Model):
                 product.product_status=True
                 product.save()
             print(self.product_status)
-    
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
-    
+
 class Unit(models.Model):
     name=models.CharField(max_length=50)
 
@@ -146,7 +146,7 @@ class Product(models.Model):
     UNIT_CHOICES = [
         (NOS ,'Nos'),
         (KGS ,'Kgs'),
-       
+
     ]
 
     productname=models.CharField(max_length=255,unique=True)
@@ -165,7 +165,7 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.productname}"
-    
+
     def generate_slug(self):
         # Combine the fields and retain dots
         raw_slug = f"{self.productname}-{self.category}-{self.id or ''}".strip('-')
@@ -181,14 +181,14 @@ class Product(models.Model):
             super().save(*args, **kwargs)
         self.product_slug = self.generate_slug()
         super().save(*args, **kwargs)
-    
+
     def get_price_for_customer(self, customer):
         # Get the price for this product for a specific customer
         try:
             return self.product_price.get(customer=customer).price
         except Product_Price.DoesNotExist:
             return None
-        
+
     def get_current_stock(self):
         """Calculate the current stock of this product."""
         grn_total = Store_Purchase_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
@@ -196,7 +196,7 @@ class Product(models.Model):
         sale_total = Sales_Receipt_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
         current_stock = grn_total - issue_total - sale_total
         return current_stock
-    
+
     def change_status(self):
         """Calculate the current stock of this product."""
         current_stock = self.get_current_stock()
@@ -217,14 +217,14 @@ class Inventory(models.Model):
     def __str__(self):
         return f"{self.product.productname} - {self.quantity} units"
 
-    
+
 # class GatePass(models.Model):
 #     products = models.ManyToManyField(Product, through='GatePassProduct')
 #     date_created = models.DateTimeField(auto_now_add=True)
 
 #     def __str__(self):
 #         return f"Gate Pass {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
-    
+
 
 class GatePass(models.Model):
     products = models.ManyToManyField(Product, through='GatePassProduct')
@@ -241,16 +241,16 @@ class GatePass(models.Model):
 
     def __str__(self):
         return f"Gate Pass {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
-    
+
 class GatePassProduct(models.Model):
     gatepass = models.ForeignKey(GatePass, on_delete=models.RESTRICT)
     product = models.ForeignKey(Product, on_delete=models.RESTRICT)
     quantity = models.IntegerField()
     remarks=models.CharField(max_length=255,null=True,blank=True)
-    
+
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
-    
+
 class Customer(models.Model):
     coname=models.CharField(max_length=255)
     region = models.ForeignKey(Region, on_delete=models.RESTRICT)
@@ -285,8 +285,8 @@ class Sales_Receipt_Product(models.Model):
     amount = models.FloatField()
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
-    
-# revised 
+
+# revised
 class Store_Issue_Request(models.Model):
     products = models.ManyToManyField(Product, through='Store_Issue_Request_Product')
     date_created = models.DateTimeField(auto_now_add=True)
@@ -308,7 +308,7 @@ class Store_Issue_Request_Product(models.Model):
 
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
-    
+
 
 class Store_Issue_Note(models.Model):
     products = models.ManyToManyField(Product, through='Store_Issue_Product')
@@ -324,9 +324,9 @@ class Store_Issue_Product(models.Model):
 
     class Meta:
         unique_together = ('store_issue_note', 'product')
-    
+
 # end revised
-    
+
 class Store_Purchase_Note(models.Model):
     products = models.ManyToManyField(Product, through='Store_Purchase_Product')
     date_created = models.DateTimeField(auto_now_add=True)
@@ -341,7 +341,7 @@ class Store_Purchase_Product(models.Model):
     quantity = models.PositiveIntegerField()
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
-    
+
 
 class Final_Product_Note(models.Model):
     products = models.ManyToManyField(Final_Product, through='Final_Product_Note_Product')
@@ -356,7 +356,7 @@ class Final_Product_Note_Product(models.Model):
     quantity = models.PositiveIntegerField()
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
-    
+
 class Employee(models.Model):
 
     ADMIN = 'Admin'
@@ -411,7 +411,7 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.name.capitalize()}"
-    
+
 class Suppliers(models.Model):
     coname=models.CharField(max_length=255)
     name=models.CharField(max_length=255)
@@ -444,7 +444,7 @@ class Product_Price(models.Model):
 
     class Meta:
         unique_together = ('product', 'customer')  # Ensure each customer has one price per product
-        
+
 class Final_Product_Price(models.Model):
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='finl_product_price')
     region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
@@ -498,7 +498,7 @@ class Account(models.Model):
             return f'{self.supplier}'
         elif self.cheque:
             return f'{self.cheque}'
-    
+
 class Transaction(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
@@ -509,7 +509,7 @@ class Transaction(models.Model):
     made_by=models.ForeignKey(User,on_delete=models.RESTRICT)
     def __str__(self):
         return f"{self.date} - {self.description}"
-    
+
     class Meta:
         indexes = [
             models.Index(fields=['debit_account']),
