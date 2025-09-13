@@ -15,10 +15,14 @@ def products(request):
         category_selected=True
         products=Final_Product.objects.filter(category=categoryID,is_deleted=False)
         # products=Product.objects.filter(is_deleted=False)
-        print(products)
+        for p in products:
+           print(p.product_status)
     else:
         categories=Finish_Product_Category.objects.filter(is_deleted=False)
         products=Final_Product.objects.filter(is_deleted=False).order_by('category')
+        for p in products:
+           print(p.product_status)
+           
     data={'products':products,'categories':categories,'category_selected':category_selected}
     return render(request,"stock_finished_product/products_home.html",data)   
 

@@ -21,13 +21,10 @@ Products {% endblock title %}
         <div class="page-body">
           <div class="row">
             {% include 'stock_finished_product/product_menu.html' %}
-
             <!-- Trigger button -->
-
             <div id="product" class="col-md-12">
               <h3 class="">Items List</h3>
             </div>
-
             <div class="card py">
               <div class="table-responsive py-2">
                 {% if products %}
@@ -40,7 +37,6 @@ Products {% endblock title %}
                       <th class="border-bottom fw-bolder text-center" scope="col">
                         Item ID#
                       </th>
-
                       <th class="border-bottom fw-bolder text-center" scope="col">
                         Product Name
                       </th>
@@ -65,9 +61,11 @@ Products {% endblock title %}
                       <td class="text-center">{{ data.id }}</td>
                       <td class="text-center">{{ data.productname }}</td>
                       <td class="text-center">{{ data.get_current_stock }}</td>
-                      <td class="text-center">{% if data.product.product_status %} Active
+                      <td class="text-center">
+                        {% if data.product_status %}
+                        Active
                         {% else %}
-                        In Active
+                        In Active 
                         {% endif %}</td>
                       <td class="text-center">{{ data.unit }}</td>
                       <td>
@@ -80,13 +78,11 @@ Products {% endblock title %}
                             class="ti-trash"></i>Delete</a>
                         {% endif %}
                       </td>
-
                       </td>
                     </tr>
                     {% endfor %}
                   </tbody>
                 </table>
-
                 {% else %}
                 <h4 class="text-center fs-5 alert alert-warning">No Record Found</h4>
                 {% endif %}
@@ -97,6 +93,4 @@ Products {% endblock title %}
       </div>
     </div>
   </div>
-  
-
   {% endblock body %}

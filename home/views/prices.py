@@ -7,10 +7,8 @@ from django.contrib.auth.decorators import login_required,permission_required
 
 
 @login_required
-@permission_required('home.delete_product_price', login_url='/login/')
+@permission_required('home.view_final_product_price', login_url='/login/')
 def list_product_prices(request):
-
-    
     region=(request.GET.get('region'))
     if region == "True":
         prices = Final_Product_Price.objects.filter(is_deleted=False, region__isnull=False)
@@ -85,7 +83,7 @@ def delete_product_price(request,id):
 
 
 @login_required
-# @permission_required('home.add_product_price', login_url='/login/')
+@permission_required('home.view_product_price', login_url='/login/')
 def search_product_price(request,id=''):
     if id:
         cat=Category.objects.filter(is_deleted=False,id=id)
@@ -118,9 +116,9 @@ def search_product_price(request,id=''):
     return render(request, 'stock/search_product_prices.html', data)
 
 
-
-
-
+# Final Product Prices
+@login_required
+@permission_required('home.add_final_product_price', login_url='/login/')
 def add_final_product_price(request, id=''):
     if id:
         cat = Finish_Product_Category.objects.filter(is_deleted=False, id=id)
@@ -165,8 +163,9 @@ def add_final_product_price(request, id=''):
     }
     return render(request, 'stock_finished_product/add_final_product_prices.html', data)
 
+@login_required
+@permission_required('home.add_final_product_price', login_url='/login/')
 def add_final_product_pricemain(request):
-    
     if request.method == 'POST':
         mydata = Final_Product_Price.objects.filter(
             is_deleted=False,
@@ -192,17 +191,6 @@ def add_final_product_pricemain(request):
       
     }
     return render(request, 'stock_finished_product/add_final_product_prices.html', data)
-
-
-
-
-
-
-
-
-
-
-
 
 @login_required
 @permission_required('home.change_product_price', login_url='/login/')
