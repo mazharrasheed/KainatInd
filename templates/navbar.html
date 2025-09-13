@@ -520,7 +520,7 @@
 
                   
                   {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
+                  <li class="{% if request.path == '/list_product_price/' %} active {% endif %} ">
                     <a href="/list_product_price/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Price List</span>
@@ -530,7 +530,7 @@
                   {% endif %}
 
                   {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
+                  <li class="{% if request.path == '/list_product_price/?region=True/' %} active {% endif %} ">
                     <a href="/list_product_price/?region=True">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Regionl Price List</span>
@@ -540,7 +540,7 @@
                   {% endif %}
 
                   {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
+                  <li class="{% if request.path == '/list_product_price/?customer=True' %} active {% endif %} ">
                     <a href="/list_product_price/?customer=True">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Customer Price List</span>
