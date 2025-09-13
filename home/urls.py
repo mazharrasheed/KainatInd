@@ -65,6 +65,7 @@ urlpatterns = [
     path('finished_product/', finished_product.products , name="finishedproduct"),
     path('add-finished-product/<int:id>', finished_product.add_product , name="addfinishedproduct1"),
     path('add-finished-product/', finished_product.add_product , name="addfinishedproduct"),
+    path('add-finished-productmain/', finished_product.add_productmain , name="addfinishedproductmain"),
     path('edit-finished-product/<int:id>', finished_product.edit_product , name="editfinishedproduct"),
     path('delete-finished-product/<int:id>', finished_product.delete_product , name="deletefinishedproduct"),
     path('delete-finished-product1/<int:id>', finished_product.delete_product1 , name="deletefinishedproduct1"),
@@ -76,8 +77,10 @@ urlpatterns = [
     path('deleteproduct_price/<int:id>', prices.delete_product_price , name="deleteproductprice"),
 
 # Search Product and Final Product Price
+    path('list_product_price/', prices.list_product_prices , name="listproductprices"),
     path('search_product_price/<int:id>', prices.search_product_price , name="searchproductprice"),
     path('add_final_product_price/<int:id>', prices.add_final_product_price , name="addfinalproductprice"),
+    path('add_final_product_pricemain/', prices.add_final_product_pricemain , name="addfinalproductpricemain"),
     path('edit_final_product_price/<int:id>', prices.edit_final_product_price , name="editfinalproductprice"),
     path('deleteproduct_price/<int:id>', prices.delete_final_product_price , name="deletefinalproductprice"),
 

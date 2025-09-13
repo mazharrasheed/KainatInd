@@ -7,6 +7,23 @@ from django.contrib.auth.decorators import login_required,permission_required
 
 
 @login_required
+@permission_required('home.delete_product_price', login_url='/login/')
+def list_product_prices(request):
+
+    
+    region=(request.GET.get('region'))
+    if region == "True":
+        prices = Final_Product_Price.objects.filter(is_deleted=False, region__isnull=False)
+
+    customer=(request.GET.get('customer'))
+
+    if customer == "True":
+        prices = Final_Product_Price.objects.filter(is_deleted=False, customer__isnull=False)
+
+    data={'prices':prices,'prod':True , 'region':region , 'customer':customer}
+    return render(request, 'stock_finished_product/list_final_product_prices.html', data)
+
+@login_required
 @permission_required('home.add_product_price', login_url='/login/')
 def add_product_price(request,id=''):
     if id:
@@ -135,6 +152,8 @@ def add_final_product_price(request, id=''):
             is_deleted=False,
             product__category_id=cat1.id
         ).order_by("-id")
+
+        print('category in views', mydata)
         form = Final_Product_PriceForm(category=cat1)
 
     data = {
@@ -145,6 +164,45 @@ def add_final_product_price(request, id=''):
         'category': cat1
     }
     return render(request, 'stock_finished_product/add_final_product_prices.html', data)
+
+def add_final_product_pricemain(request):
+    
+    if request.method == 'POST':
+        mydata = Final_Product_Price.objects.filter(
+            is_deleted=False,
+        )
+        form = Final_Product_PriceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Final Product Price Added successfully !!")
+            return redirect('addfinalproductpricemain', id if id else categoryID)
+    else:
+        
+        mydata = Final_Product_Price.objects.filter(
+            is_deleted=False,
+        ).order_by("-id")
+
+        print('category in views', mydata)
+        form = Final_Product_PriceForm()
+
+    data = {
+        'form': form,
+        'mydata': mydata,
+        'prod': True,
+      
+    }
+    return render(request, 'stock_finished_product/add_final_product_prices.html', data)
+
+
+
+
+
+
+
+
+
+
+
 
 @login_required
 @permission_required('home.change_product_price', login_url='/login/')

@@ -214,6 +214,8 @@ class Final_Product_PriceForm(forms.ModelForm):
         super(Final_Product_PriceForm, self).__init__(*args, **kwargs)
 
         # Filter products by category if provided
+
+        print('category from forms',category)
         if category:
             self.fields['product'].queryset = Final_Product.objects.filter(
                 category_id=category.id if hasattr(category, "id") else category,
@@ -484,10 +486,21 @@ class Sales_ReceiptForm(forms.ModelForm):
 
         return cleaned_data
 
+from django.db.models import Exists, OuterRef
 
 class Sales_Receipt_ProductForm(forms.ModelForm):
     product = forms.ModelChoiceField(
-        queryset=Final_Product.objects.filter(is_deleted=False,product_status=True),
+        queryset=Final_Product.objects.filter(
+            is_deleted=False,
+            product_status=True
+        ).filter(
+            Exists(
+                Final_Product_Price.objects.filter(
+                    product=OuterRef("pk"),
+                    is_deleted=False
+                )
+            )
+        ),
         empty_label="Select Product"
     )
     quantity = forms.IntegerField(min_value=1, initial=1, label="Quantity")

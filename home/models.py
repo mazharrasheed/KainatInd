@@ -195,6 +195,7 @@ class Product(models.Model):
         issue_total = Store_Issue_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
         sale_total = Sales_Receipt_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
         current_stock = grn_total - issue_total - sale_total
+        print(grn_total,issue_total,sale_total)
         return current_stock
 
     def change_status(self):
