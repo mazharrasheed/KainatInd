@@ -9,6 +9,10 @@ from django.contrib.auth.decorators import login_required,permission_required
 @login_required
 @permission_required('home.view_final_product_price', login_url='/login/')
 def list_product_prices(request):
+
+    prices=None
+    customer=None
+    prices = Final_Product_Price.objects.filter(is_deleted=False)
     region=(request.GET.get('region'))
     if region == "True":
         prices = Final_Product_Price.objects.filter(is_deleted=False, region__isnull=False)
@@ -18,7 +22,9 @@ def list_product_prices(request):
     if customer == "True":
         prices = Final_Product_Price.objects.filter(is_deleted=False, customer__isnull=False)
 
-    data={'prices':prices,'prod':True , 'region':region , 'customer':customer}
+    
+
+    data={'prices':prices,'prod':True , 'region':region , 'customer':customer , }
     return render(request, 'stock_finished_product/list_final_product_prices.html', data)
 
 @login_required

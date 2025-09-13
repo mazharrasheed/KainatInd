@@ -13,16 +13,10 @@ def products(request):
     if categoryID:
         categories=Finish_Product_Category.objects.filter(is_deleted=False,id=categoryID)
         category_selected=True
-        products=Final_Product.objects.filter(category=categoryID,is_deleted=False)
-        # products=Product.objects.filter(is_deleted=False)
-        for p in products:
-           print(p.product_status)
+        products=Final_Product.objects.filter(category=categoryID,is_deleted=False)    
     else:
         categories=Finish_Product_Category.objects.filter(is_deleted=False)
-        products=Final_Product.objects.filter(is_deleted=False).order_by('category')
-        for p in products:
-           print(p.product_status)
-           
+        products=Final_Product.objects.filter(is_deleted=False).order_by('category')   
     data={'products':products,'categories':categories,'category_selected':category_selected}
     return render(request,"stock_finished_product/products_home.html",data)   
 

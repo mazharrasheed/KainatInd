@@ -495,6 +495,9 @@
                   </li>
                   {% endif %}
 
+
+                  
+
                   {% if perms.home.view_product %}
                   <li class=" {% if request.path == '/product/' %} active {% endif %} ">
                     <a href="/product/">
@@ -510,6 +513,37 @@
                     <a href="/finished_product/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Products</span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+                  
+                  {% if perms.home.view_final_product_price %}
+                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
+                    <a href="/list_product_price/">
+                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Price List</span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+                  {% if perms.home.view_final_product_price %}
+                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
+                    <a href="/list_product_price/?region=True">
+                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Regionl Price List</span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+                  {% if perms.home.view_final_product_price %}
+                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
+                    <a href="/list_product_price/?customer=True">
+                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Customer Price List</span>
                       <span class="pcoded-mcaret"></span>
                     </a>
                   </li>
@@ -652,25 +686,6 @@
                   </li>
                   {% endif %}
 
-                  {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
-                    <a href="/list_product_price/?region=True">
-                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
-                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Regionl Price List</span>
-                      <span class="pcoded-mcaret"></span>
-                    </a>
-                  </li>
-                  {% endif %}
-
-                  {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list-sales/' %} active {% endif %} ">
-                    <a href="/list_product_price/?customer=True">
-                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
-                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Customer Price List</span>
-                      <span class="pcoded-mcaret"></span>
-                    </a>
-                  </li>
-                  {% endif %}
 
                 </ul>
               </li>
