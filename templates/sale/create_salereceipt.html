@@ -100,7 +100,7 @@
                     <td>{{ form.product|as_crispy_field }}</td>
                     <td id="in_stock">In Stock</td>
                     <td>{{ form.quantity|as_crispy_field }}</td>
-                    <td>Unit Price (Auto)</td>
+                    <td id="price"> price</td>
                     <td id="amount">Auto</td>
                     <td><button id="add-product" class="btn btn-primary" type="button">Add Product</button></td>
                   </tr>
@@ -131,20 +131,61 @@
 $(document).ready(function () {
   let productList = [];
 
-  // get stock on product select
-  $("#id_product").on("change", (e) => {
-    $.ajax({
-      url: `/get-stock-final-product/${e.target.value}`,
-      method: "GET",
-      success: function (data) {
-        if (data.success) {
-          $("#in_stock").text(`${data.stock}`);
-        } else {
-          $("#in_stock").text("N/A");
-        }
+  let product = $('#id_product');
+  let quantity = $('#id_quantity');
+
+// Disable the field
+product.prop("disabled", true);
+quantity.prop("disabled", true);
+
+
+// get stock on product select
+$("#id_product").on("change", (e) => {
+  let productId = e.target.value;
+  let customerId = $("#id_customer_name").val();   // assuming dropdown with id="id_customer"
+  let regionId   = $("#id_region").val();     // assuming dropdown with id="id_region"
+
+  // Check if at least one is selected
+  if (!customerId && !regionId) {
+    alert("Please select either a Customer or a Region first.");
+    $("#id_product").val(""); // reset product select if nothing chosen
+    return;
+  }
+
+  // Build query params
+  let params = {};
+  if (customerId) params.customer = customerId;
+  if (regionId)   params.region = regionId;
+
+  $.ajax({
+    url: `/get-stock-final-product/${productId}`,
+    method: "GET",
+    data: params,   // send customer/region (or both)
+    success: function (data) {
+      if (data.success) {
+        $("#in_stock").text(`${data.stock}`);
+        $("#price").text(`${data.price}`);
+      } else {
+        $("#in_stock").text("N/A");
       }
-    });
+    }
   });
+});
+
+
+
+// Check region for customer
+$("#id_customer_name").on("change", (e) => {
+  const product = $('#id_product');
+  let quantity = $('#id_quantity');
+  
+  let customerId = e.target.value;
+  console.log("custeomer selected")
+  product.prop("disabled", false);
+  quantity.prop("disabled", false);
+
+});
+
 
   // add product
   $("#add-product").on("click", function () {

@@ -192,7 +192,7 @@ class Product_PriceForm(forms.ModelForm):
 class Final_Product_PriceForm(forms.ModelForm):
     product = forms.ModelChoiceField(
         queryset=Final_Product.objects.filter(is_deleted=False),
-        empty_label="Select Final Product"
+        empty_label="Select Product"
     )
     customer = forms.ModelChoiceField(
         queryset=Customer.objects.filter(is_deleted=False),

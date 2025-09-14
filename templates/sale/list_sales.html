@@ -8,9 +8,9 @@ Sales-List
 
 {% block context %}
 {% if request.user.is_superuser %}
-{% include 'navbar.html' %} 
+{% include 'navbar.html' %}
 {% else %}
-{% include 'sale/navbar.html' %} 
+{% include 'sale/navbar.html' %}
 {% endif %}
 {% endblock context %}
 
@@ -36,12 +36,14 @@ Sales-List
               {% if customer %}
 
               {% if perms.home.add_sales_receipt %}
-              <a class="btn btn-primary mb-2" href="{% url 'create_salereceipt' %}"><i class="ti-plus me-1"></i> Customer Sale Receipt</a>
+              <a class="btn btn-primary mb-2" href="{% url 'create_salereceipt' %}"><i class="ti-plus me-1"></i>
+                Customer Sale Receipt</a>
               {% endif %}
 
               {% elif cash %}
               {% if perms.home.add_sales_receipt %}
-              <a class="btn btn-primary mb-2" href="{% url 'create_cash_salereceipt' %}"><i class="ti-plus me-1"></i> Cash Sale Receipt</a>
+              <a class="btn btn-primary mb-2" href="{% url 'create_cash_salereceipt' %}"><i class="ti-plus me-1"></i>
+                Cash Sale Receipt</a>
 
               {% endif %}
 
@@ -71,6 +73,9 @@ Sales-List
                           Bill Amount
                         </th>
                         <th class="border-bottom fw-bolder text-center" scope="col">
+                          Transaction
+                        </th>
+                        <th class="border-bottom fw-bolder text-center" scope="col">
                           Action
                         </th>
                       </tr>
@@ -82,10 +87,10 @@ Sales-List
                         <td class="text-center">{{ salereceipt.id }}</td>
                         <td class="text-center">{{ salereceipt.date_created }}</td>
                         <td class="text-center">
-                          {% if salereceipt.customer  %}
+                          {% if salereceipt.customer %}
                           {{ salereceipt.customer|title }}
-                            {% else %}
-                            {{ salereceipt.customer_name|title }}
+                          {% else %}
+                          {{ salereceipt.customer_name|title }}
                           {% endif %}
                         </td>
                         <td class="text-center">
@@ -94,20 +99,24 @@ Sales-List
                         <td class="text-center">
                           {{ total_amount|get_amount:salereceipt.id}}
                         </td>
-                        <td class="text-center">
-
-                          {% if customer %}
+                        <td class="text-center" >{% if customer %}
                           {% if perms.home.add_transaction %}
                           {% if salereceipt.make_transaction %}
                           <button class="btn alert-success" href="#" disabled>
-                            Transacton Added
+                            Added
                           </button>
                           {% else %}
-                          <a class="btn btn-info" href="{% url 'maketransaction' salereceipt.id %}"><i class="ti-plus me-1"></i> Transacton</a>
-                          {% endif %}
-                          {% endif %}
-                          {% endif %}
 
+                          <button class="btn btn-info transaction-btn" data-id="{{ salereceipt.id }}"
+                            href="{% url 'maketransaction' salereceipt.id %}">
+                            <i class="ti-plus me-1"></i> Add
+                          </button>
+                          {% endif %}
+                          {% endif %}
+                          {% endif %}
+                        </td>
+                        
+                        <td class="text-center">
                           {% if perms.home.view_sale_receipt %}
                           <a class="btn btn-success text-light" href="{% url 'print_salereceipt' salereceipt.id %}">
                             <i class="ti-printer me-1"></i> </a>
@@ -115,16 +124,15 @@ Sales-List
 
                           {% if perms.home.change_sale_receipt %}
 
-                          {% if salereceipt.make_transaction %}  
-                          
+                          {% if salereceipt.make_transaction %}
+
                           <button class="btn btn-warning text-light me-1" disabled="true" href="{% if cash %}
                           {% url 'edit_cashsale_receipt' salereceipt.id %}
                           {% else %}
                         
-                          {% url 'edit_salereceipt' salereceipt.id %}"
-                         
-                          {% endif %} > <i class="ti-pencil me-1"></i>  </button>
-                                          
+                          {% url 'edit_salereceipt' salereceipt.id %}" {% endif %}> <i class="ti-pencil me-1"></i>
+                          </button>
+
 
                           {% else %}
 
@@ -133,23 +141,24 @@ Sales-List
                           {% else %}
                          
                           {% url 'edit_salereceipt' salereceipt.id %}"> <i class="ti-pencil me-1"></i> </a>
-                         
+
                           {% endif %}
                           {% endif %}
                           {% endif %}
 
                           {% if perms.home.delete_sale_receipt %}
-                          {% if salereceipt.make_transaction %}  
-                          <button class="btn btn-danger"  disabled   data-salereceipt-id="{{ salereceipt.id }}">
-                           <i class="ti-trash me-1"></i> 
-                          </button>        
+                          {% if salereceipt.make_transaction %}
+                          <button class="btn btn-danger" disabled data-salereceipt-id="{{ salereceipt.id }}">
+                            <i class="ti-trash me-1"></i>
+                          </button>
                           {% else %}
                           <button class="btn btn-danger delete-salereceipt" data-salereceipt-id="{{ salereceipt.id }}">
-                          <i class="ti-trash me-1"></i> 
+                            <i class="ti-trash me-1"></i>
                           </button>
                           {% endif %}
                           {% endif %}
                         </td>
+                        
                       </tr>
                       {% endfor %}
                     </tbody>
@@ -209,9 +218,9 @@ Sales-List
                   },
                   success: function (response) {
                     if (response.total_sale !== undefined) {
-                      $("#total_amount").text(`Cash Sales List [ Total Amount Rs.=${response.total_sale}]` )
+                      $("#total_amount").text(`Cash Sales List [ Total Amount Rs.=${response.total_sale}]`)
 
-                      console.log( response.total_sale)
+                      console.log(response.total_sale)
                       // alert('Total Sale: ' + response.total_sale);
                     } else {
                       alert('Failed to fetch total sale.');
@@ -222,6 +231,53 @@ Sales-List
                     alert('An error occurred while fetching total sale.');
                   }
                 });
+              }
+            });
+          });
+        </script>
+
+
+
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+          $(document).on("click", ".transaction-btn", function (e) {
+            e.preventDefault();
+            let btn = $(this);
+            let url = btn.attr("href");
+
+            $.ajax({
+              url: url,
+              type: "POST",
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success: function (response) {
+                alert(response.message);
+
+                // Disable the button and change text/icon dynamically
+                btn.removeClass('btn-info').addClass('alert-success').html('Transaction Added').prop('disabled', true);
+                
+                // Optionally: disable edit/delete buttons for this row
+                let row = btn.closest('tr');
+                row.find('.btn-warning, .btn-danger').prop('disabled', true);
+
+                let warningBtn = row.find('.btn-warning');
+
+                // If it's an <a>, replace it with a disabled <button>
+                if (warningBtn.is('a')) {
+                  warningBtn.replaceWith(
+                    '<button class="btn btn-warning text-light me-1" disabled><i class="ti-pencil me-1"></i></button>'
+                  );
+                } else {
+                  warningBtn.prop('disabled', true);
+                }
+
+                // Disable delete button normally (since it's always a <button>)
+                row.find('.btn-danger').prop('disabled', true);
+              },
+              error: function (xhr) {
+                alert("Error: " + xhr.responseJSON.message);
               }
             });
           });

@@ -40,6 +40,8 @@ class Company(models.Model):
 
     def __str__(self):
         return self.name
+    
+
 class Project(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
@@ -82,6 +84,31 @@ class Final_Product(models.Model):
         def __str__(self):
             return f"{self.productname}"
 
+        def get_product_price(self, customer,region):
+            # Get the price for this product for a specific customer
+            unit_price = None
+            print('from models', customer, region)
+            try:
+                # Only convert to int if value exists
+                customer_id = int(customer) if customer else None
+                region_id = int(region) if region else None
+                if customer_id:
+                    customer_region_id=Customer.objects.get(is_deleted=False,id=customer_id).region.id
+                    obj = self.final_product_price.filter(region_id=customer_region_id).order_by('-id').first()
+                    if obj:
+                        unit_price = obj.price
+                if not unit_price and region_id:
+                    obj = self.final_product_price.filter(region_id=region_id).order_by('-id').first()
+                    if obj:
+                        unit_price = obj.price
+                print(unit_price)
+                return unit_price
+            except Exception as e:
+                print("Error in getting unit price:", e)
+                return None
+            except Product_Price.DoesNotExist:
+                return None
+            
         def get_price_for_customer(self, customer):
             # Get the price for this product for a specific customer
             try:
@@ -114,6 +141,69 @@ class Final_Product(models.Model):
                 product.product_status=True
                 product.save()
             print(self.product_status)
+
+class Customer(models.Model):
+    coname=models.CharField(max_length=255)
+    region = models.ForeignKey(Region, on_delete=models.RESTRICT)
+    name=models.CharField(max_length=255)
+    address=models.CharField(max_length=255)
+    contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.coname
+        # return f"{self.coname.capitalize()} "
+
+    def get_customer_region(self):
+
+        if self.region:
+            return self.region.id
+
+class Final_Product_Price(models.Model):
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='final_product_price')
+    region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
+    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT,null=True ,blank=True)
+    price = models.FloatField()
+    is_deleted=models.BooleanField(default=False)
+
+
+class Final_Product_Note(models.Model):
+    products = models.ManyToManyField(Final_Product, through='Final_Product_Note_Product')
+    date_created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
+    def __str__(self):
+        return f"Final Product Note {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
+
+class Final_Product_Note_Product(models.Model):
+    final_product_note = models.ForeignKey(Final_Product_Note, on_delete=models.RESTRICT)
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
+    quantity = models.PositiveIntegerField()
+    def __str__(self):
+        return f"{self.product.productname} (Qty: {self.quantity})"
+
+class Sales_Receipt(models.Model):
+    products = models.ManyToManyField(Final_Product, through='Sales_Receipt_Product')
+    date_created = models.DateTimeField(auto_now_add=True)
+    customer_name =  models.ForeignKey(Customer,on_delete=models.RESTRICT,null=True,blank=True)
+    region =  models.ForeignKey(Region,on_delete=models.RESTRICT,null=True,blank=True)
+    customer =  models.CharField(max_length=220,null=True,blank=True)
+    phone_number = models.CharField(max_length=12)
+    created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
+    make_transaction = models.BooleanField(default=False)
+    is_cash = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Sale Receipt {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
+
+class Sales_Receipt_Product(models.Model):
+    salereceipt = models.ForeignKey(Sales_Receipt, on_delete=models.RESTRICT,related_name="sales_receipt_products")
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.FloatField()
+    amount = models.FloatField()
+    def __str__(self):
+        return f"{self.product.productname} (Qty: {self.quantity})"
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -252,40 +342,9 @@ class GatePassProduct(models.Model):
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
 
-class Customer(models.Model):
-    coname=models.CharField(max_length=255)
-    region = models.ForeignKey(Region, on_delete=models.RESTRICT)
-    name=models.CharField(max_length=255)
-    address=models.CharField(max_length=255)
-    contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
-    is_deleted = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.coname
-        # return f"{self.coname.capitalize()} "
 
-class Sales_Receipt(models.Model):
-    products = models.ManyToManyField(Final_Product, through='Sales_Receipt_Product')
-    date_created = models.DateTimeField(auto_now_add=True)
-    customer_name =  models.ForeignKey(Customer,on_delete=models.RESTRICT,null=True,blank=True)
-    region =  models.ForeignKey(Region,on_delete=models.RESTRICT,null=True,blank=True)
-    customer =  models.CharField(max_length=220,null=True,blank=True)
-    phone_number = models.CharField(max_length=12)
-    created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
-    make_transaction = models.BooleanField(default=False)
-    is_cash = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"Sale Receipt {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
-
-class Sales_Receipt_Product(models.Model):
-    salereceipt = models.ForeignKey(Sales_Receipt, on_delete=models.RESTRICT,related_name="sales_receipt_products")
-    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
-    quantity = models.PositiveIntegerField()
-    unit_price = models.FloatField()
-    amount = models.FloatField()
-    def __str__(self):
-        return f"{self.product.productname} (Qty: {self.quantity})"
 
 # revised
 class Store_Issue_Request(models.Model):
@@ -344,19 +403,7 @@ class Store_Purchase_Product(models.Model):
         return f"{self.product.productname} (Qty: {self.quantity})"
 
 
-class Final_Product_Note(models.Model):
-    products = models.ManyToManyField(Final_Product, through='Final_Product_Note_Product')
-    date_created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
-    def __str__(self):
-        return f"Final Product Note {self.id} - {self.date_created.strftime('%Y-%m-%d')}"
 
-class Final_Product_Note_Product(models.Model):
-    final_product_note = models.ForeignKey(Final_Product_Note, on_delete=models.RESTRICT)
-    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
-    quantity = models.PositiveIntegerField()
-    def __str__(self):
-        return f"{self.product.productname} (Qty: {self.quantity})"
 
 class Employee(models.Model):
 
@@ -437,7 +484,7 @@ class Cheque(models.Model):
         # return f"{self.customer} {self.cheque_number}".capitalize()
 
 class Product_Price(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.RESTRICT, related_name='finl_product_price')
+    product = models.ForeignKey(Product, on_delete=models.RESTRICT, related_name='product_price')
     region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
     customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
     price = models.FloatField()
@@ -446,12 +493,7 @@ class Product_Price(models.Model):
     class Meta:
         unique_together = ('product', 'customer')  # Ensure each customer has one price per product
 
-class Final_Product_Price(models.Model):
-    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='finl_product_price')
-    region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
-    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT,null=True ,blank=True)
-    price = models.FloatField()
-    is_deleted=models.BooleanField(default=False)
+
 
     class Meta:
         unique_together = ('product', 'customer')  # Ensure each customer has one price per product

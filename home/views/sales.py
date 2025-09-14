@@ -15,11 +15,16 @@ from django.db import IntegrityError
 @login_required
 def get_final_product_stock(request,id):
     print('fdfsfdf')
+    customer = request.GET.get('customer')
+    region = request.GET.get('region')
+    print('customer from getstock ',customer,region ,type(region))
     product=Final_Product.objects.get(id=id)
     stock_qty=product.get_current_stock()
+    product_price=product.get_product_price(customer=customer ,region=region)
+    print('from get stock',product_price)
     print(stock_qty)
     print(id,stock_qty)
-    return JsonResponse({'success': True,'stock':stock_qty})
+    return JsonResponse({'success': True,'stock':stock_qty,'price':product_price})
 
 
 @login_required
@@ -85,9 +90,11 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from ..forms import Sales_ReceiptForm, Sales_Receipt_ProductForm
 from ..models import Sales_Receipt, Sales_Receipt_Product, Final_Product, Final_Product_Price
-
+from django.db import transaction
 @login_required
 @permission_required('home.add_sales_receipt', login_url='/login/')
+
+
 def create_salereceipt(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         if 'finalize' in request.POST:
@@ -95,57 +102,55 @@ def create_salereceipt(request):
             products = request.POST.getlist('products[]')
 
             if form_salereceipt.is_valid() and products:
-                salercpt = form_salereceipt.save(commit=False)
-                salercpt.created_by = request.user
-                salercpt.save()
+                try:
+                    with transaction.atomic():  # 👈 Everything inside will rollback on error
+                        salercpt = form_salereceipt.save(commit=False)
+                        salercpt.created_by = request.user
+                        salercpt.save()
 
-                customer = form_salereceipt.cleaned_data.get('customer_name')
-                region = form_salereceipt.cleaned_data.get('region')
+                        customer = form_salereceipt.cleaned_data.get('customer_name')
+                        region = form_salereceipt.cleaned_data.get('region')
 
-                for product_data in products:
-                    try:
-                        product_id, quantity = product_data.split(':')
-                        product = get_object_or_404(Final_Product, id=product_id)
+                        for product_data in products:
+                            product_id, quantity = product_data.split(':')
+                            product = get_object_or_404(Final_Product, id=product_id)
 
-                        # Find unit price for customer first, else region
-                        unit_price_obj = None
-                        if customer:
-                            unit_price_obj = Final_Product_Price.objects.filter(
-                                is_deleted=False,
-                                customer=customer,
-                                product=product
-                            ).first()
-                        if not unit_price_obj and region:
-                            unit_price_obj = Final_Product_Price.objects.filter(
-                                is_deleted=False,
-                                region=region,
-                                product=product
-                            ).first()
+                            unit_price_obj = None
+                            if customer:
+                                customer_obj = Customer.objects.get(coname=customer)
+                                customer_region = customer_obj.region
+                                unit_price_obj = Final_Product_Price.objects.filter(
+                                    is_deleted=False,
+                                    # customer=customer,
+                                    product=product,
+                                    region=customer_region
+                                ).first()
+                            if not unit_price_obj and region:
+                                unit_price_obj = Final_Product_Price.objects.filter(
+                                    is_deleted=False,
+                                    region=region,
+                                    product=product
+                                ).first()
 
-                        if not unit_price_obj:
-                            return JsonResponse({
-                                'success': False,
-                                'errors': f'No price defined for product {product.productname}'
-                            })
+                            if not unit_price_obj:
+                                raise ValueError(f'No price defined for product {product.productname}')  
 
-                        quantity = int(quantity)
-                        unit_price = float(unit_price_obj.price)
-                        amount = unit_price * quantity
+                            quantity = int(quantity)
+                            unit_price = float(unit_price_obj.price)
+                            amount = unit_price * quantity
 
-                        Sales_Receipt_Product.objects.create(
-                            salereceipt=salercpt,
-                            product=product,
-                            quantity=quantity,
-                            unit_price=unit_price,
-                            amount=amount
-                        )
+                            Sales_Receipt_Product.objects.create(
+                                salereceipt=salercpt,
+                                product=product,
+                                quantity=quantity,
+                                unit_price=unit_price,
+                                amount=amount
+                            )
+                            product.change_status()
 
-                        product.change_status()
-
-                    except Exception as e:
-                        return JsonResponse({'success': False, 'errors': str(e)})
-
-                return JsonResponse({'success': True, 'redirect_url': '/list-sales?customer=True'})
+                        return JsonResponse({'success': True, 'redirect_url': '/list-sales?customer=True'})
+                except Exception as e:
+                    return JsonResponse({'success': False, 'errors': str(e)})
             else:
                 return JsonResponse({'success': False, 'errors': form_salereceipt.errors.as_json()})
 
@@ -398,7 +403,7 @@ def print_salereceipt(request, salereceipt_id):
 
     })
 
-def make_transaction(request,id):
+def make_transaction1(request,id):
 
     salereceipt_items_pro = {}
     total_amount = {}
@@ -435,3 +440,50 @@ def make_transaction(request,id):
     #     'salereceipt_items_pro': salereceipt_items_pro,
     #     'total_amount': total_amount
     # })
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.db.models import Sum
+from ..models import Sales_Receipt, Sales_Receipt_Product, Customer, Account, Transaction
+
+def make_transaction(request, id):
+    if request.method == "POST":
+        salereceipt_items_pro = {}
+        total_amount = {}
+        salereceipt = get_object_or_404(Sales_Receipt, id=id)
+        salereceipts = Sales_Receipt.objects.all()
+
+        for x in salereceipts:
+            salereceipt_items_pro[x.id] = Sales_Receipt_Product.objects.filter(salereceipt=x).count()
+            salereceipt_products = Sales_Receipt_Product.objects.filter(salereceipt=x)
+            total_amount[x.id] = salereceipt_products.aggregate(Sum('amount'))
+
+        customer_name = salereceipt.customer_name
+        customer = Customer.objects.get(coname=customer_name, is_deleted=False)
+        debit_account = Account.objects.get(customer=customer.id, is_deleted=False)
+        credit_account = Account.objects.get(account_type="Revenue", name="Sales", is_deleted=False)
+
+        amt = total_amount[id]
+        amount = amt['amount__sum'] if amt['amount__sum'] else 0
+
+        transaction = Transaction(
+            description=f'Sales receipt id = {salereceipt.id}',
+            debit_account=debit_account,
+            credit_account=credit_account,
+            amount=amount,
+            made_by=request.user
+        )
+        transaction.save()
+
+        salereceipt.make_transaction = True
+        salereceipt.save()
+
+        # Return JSON response for AJAX
+        return JsonResponse({
+            "status": "success",
+            "message": "Transaction added successfully!",
+            "transaction_id": transaction.id,
+            "amount": amount
+        })
+
+    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
