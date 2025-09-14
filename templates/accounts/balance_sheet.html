@@ -21,9 +21,9 @@ Balance Sheet {% endblock title %}
         <div class="page-body">
           <div class="row">
             <div class="col-lg-12">
-              <h2 class="text-center alert alert-info ">Balance Sheet - Net Profit:{{net_profit}}</h2>
+              <h4 class=" ">Balance Sheet - Net Profit:{{net_profit}}</h4>
               <div class="col-12 mt-5">
-                <h2 class="text-center alert alert-info">Assets Accounts Balance : {{ asset }}</h2>
+                <h4 class="">Assets Accounts Balance : {{ asset }}</h4>
                 <div class="card py">
                   <div class="table-responsive py-2">
                     {% if asset %}
@@ -71,7 +71,7 @@ Balance Sheet {% endblock title %}
               <hr class="mt-4">
               <!-- Liabilities Accounts -->
               <div class="col-12 mt-5">
-                <h2 class="text-center alert alert-info">Liabilities Accounts Balance : {{liabilitie}}</h2>
+                <h4 class="">Liabilities Accounts Balance : {{liabilitie}}</h4>
                 <div class="card py">
                   <div class="table-responsive py-2">
                     {% if liabilitie %}
@@ -122,7 +122,7 @@ Balance Sheet {% endblock title %}
 
           <!-- Equit Accounts -->
           <div class="col-12 mt-5">
-            <h2 class="text-center alert alert-info"> Equity Accounts Balance : {{ equity }}</h2>
+            <h4 class=""> Equity Accounts Balance : {{ equity }}</h4>
             <div class="card py">
               <div class="table-responsive py-2">
                 {% if equity %}
@@ -171,7 +171,7 @@ Balance Sheet {% endblock title %}
 
           <!-- Revenue Accounts -->
           <div class="col-12 mt-5">
-            <h2 class="text-center alert alert-info"> Revenue Accounts Balance : {{ revenue }}</h2>
+            <h4 class=""> Revenue Accounts Balance : {{ revenue }}</h4>
             <div class="card py">
               <div class="table-responsive py-2">
                 {% if revenue %}
@@ -222,7 +222,7 @@ Balance Sheet {% endblock title %}
 
       <!-- Expenses  Accounts -->
       <div class="col-12 mt-5">
-        <h2 class="text-center alert alert-info"> Expenses Accounts Balance : {{ expenses }}</h2>
+        <h4 class=""> Expenses Accounts Balance : {{ expenses }}</h4>
         <div class="card py">
           <div class="table-responsive py-2">
             {% if expenses %}
@@ -268,12 +268,12 @@ Balance Sheet {% endblock title %}
         {% endif %}
       </div>
     </div>
-  </div>
+
   <hr class="mt-4">
 
   <!-- Gain  Accounts -->
   <div class="col-12 mt-5">
-    <h2 class="text-center alert alert-info"> Gain Accounts Balance : {{ gain }}</h2>
+    <h4 class=""> Gain Accounts Balance : {{ gain }}</h4>
     <div class="card py">
       <div class="table-responsive py-2">
         {% if gain %}
@@ -324,7 +324,7 @@ Balance Sheet {% endblock title %}
 
 <!-- Loss  Accounts -->
 <div class="col-12 mt-5">
-  <h2 class="text-center alert alert-info"> Loss Accounts Balance : {{ loss }}</h2>
+  <h4 class=""> Loss Accounts Balance : {{ loss }}</h4>
   <div class="card py">
     <div class="table-responsive py-2">
       {% if loss %}
@@ -375,7 +375,7 @@ Balance Sheet {% endblock title %}
 
 <!-- Commitment Accounts -->
 <div class="col-12 mt-5">
-  <h2 class="text-center alert alert-info"> Commitment Accounts Balance : {{ commitment }}</h2>
+  <h4 class=""> Commitment Accounts Balance : {{ commitment }}</h4>
   <div class="card py">
     <div class="table-responsive py-2">
       {% if commitment %}
