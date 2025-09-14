@@ -1,5 +1,6 @@
 
-<ul class="nav nav-pills ms-3 mb-3">
+
+<ul class="nav nav-pills  mb-3">
 
   <li class="nav-item " style="line-height:2;">
     <a class="nav-link p-2" aria-current="page" href="/finished_product/" class="list-group-item">All Products</a>
@@ -8,13 +9,14 @@
   {% if not prod %}
     {% if not category_selected %}
 <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle"  data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Categories<i class="ti-arrow-down ms-1"></i></a>
+    <a class="nav-link dropdown-toggle" style="padding-bottom: 9px !important;"  data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Categories
+    <i class="bi bi-caret-down-fill ms-1"></i> </a>
     <ul class="dropdown-menu">
       {% for category in categories %}
       <li >
       <a class="dropdown-item p-2 ms-3" aria-current="page" href="?category={{category.id}}">{{category.name}}</a> </i>
     </li>
-    <li><hr class="dropdown-divider"></li>
+   
       {% endfor %}
     </ul>
   </li>

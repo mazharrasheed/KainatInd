@@ -81,13 +81,13 @@ Edit Customer Slae Receipt
             <h3 class="text-center bg-dark text-light p-3">Edit Customer Sale Receipt</h3>
             <form id="salereceipt-form" method="POST">
               {% csrf_token %}
-              <div class="header-section">
-                <div>
+              <div class="header-section row">
+                <div class="col-md-6">
                   <h4>MASH Systems</h4>
                   <h6>Gujranwala</h6>
                   <h6>Cell: 0301-8742840</h6>
                 </div>
-                <div style="margin-right:50px; width:500px">
+                <div class="col-md-6" style=" ">
                   <p><strong>Date:</strong> {{ salereceipt.date_created|date:"Y-m-d H:i" }}</p>
                   <p>{{ form_salereceipt.customer_name|as_crispy_field }}</p>
                   <p>{{ form_salereceipt.region|as_crispy_field }}</p>
@@ -102,7 +102,7 @@ Edit Customer Slae Receipt
                     <td>{{ form.quantity|as_crispy_field }}</td>
                     <td>Unit Price (Auto)</td>
                     <td id="amount">Auto</td>
-                    <td><button id="add-product" class="btn btn-primary" type="button">Add Product</button></td>
+                    <td><button id="add-product" class="btn btn-primary" type="button"><i class="ti-plus me-1"></i> </button></td>
                   </tr>
                   <tr>
                     <th>Product</th>
@@ -121,14 +121,15 @@ Edit Customer Slae Receipt
                     <td>{{ sp.quantity }}</td>
                     <td>{{ sp.unit_price }}</td>
                     <td>{{ sp.amount }}</td>
-                    <td><button type="button" class="delete-product btn btn-danger" data-id="{{ sp.product.id }}">Delete</button></td>
+                    <td><button type="button" class="delete-product btn btn-danger" data-id="{{ sp.product.id }}">
+                      <i class="ti-trash me-1"></i></button></td>
                   </tr>
                   {% endfor %}
                 </tbody>
               </table>
 
-              <button id="finalize-receipt" class="btn btn-success">Update Receipt</button>
-              <a href="/list-sales?customer=True" class="btn btn-warning">Cancel</a>
+              <button id="finalize-receipt" class="btn btn-success text-light"><i class="ti-pencil-alt me-1"></i></button>
+              <a href="/list-sales?customer=True" class="btn btn-warning text-light"> <i class="ti-close me-1"></i> </a>
             </form>
           </div>
         </div>
