@@ -180,7 +180,7 @@ def add_final_product_pricemain(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Final Product Price Added successfully !!")
-            return redirect('addfinalproductpricemain', id if id else categoryID)
+            return redirect('addfinalproductpricemain')
     else:
         
         mydata = Final_Product_Price.objects.filter(
@@ -188,6 +188,9 @@ def add_final_product_pricemain(request):
         ).order_by("-id")
 
         print('category in views', mydata)
+
+        for i in mydata:
+            print(i.price_list)
         form = Final_Product_PriceForm()
 
     data = {

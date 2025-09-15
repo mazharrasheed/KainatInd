@@ -520,30 +520,19 @@
 
                   
                   {% if perms.home.view_final_product_price %}
+                  <li class="{% if request.path == '/add_final_product_pricemain/' %} active {% endif %} ">
+                    <a href="/add_final_product_pricemain/">
+                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Prices</span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                   {% endif %}
+                  {% if perms.home.view_price_list %}
                   <li class="{% if request.path == '/list_product_price/' %} active {% endif %} ">
-                    <a href="/list_product_price/">
+                    <a href="/prices_list/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Price List</span>
-                      <span class="pcoded-mcaret"></span>
-                    </a>
-                  </li>
-                  {% endif %}
-
-                  {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list_product_price/?region=True/' %} active {% endif %} ">
-                    <a href="/list_product_price/?region=True">
-                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
-                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Regionl Price List</span>
-                      <span class="pcoded-mcaret"></span>
-                    </a>
-                  </li>
-                  {% endif %}
-
-                  {% if perms.home.view_final_product_price %}
-                  <li class="{% if request.path == '/list_product_price/?customer=True' %} active {% endif %} ">
-                    <a href="/list_product_price/?customer=True">
-                      <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
-                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Customer Price List</span>
                       <span class="pcoded-mcaret"></span>
                     </a>
                   </li>
@@ -563,7 +552,7 @@
                   <li class=" {% if request.path == '/puchase-note/' %} active {% endif %} ">
                     <a href="/list-store-purchase/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
-                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Goods Receipt Note</span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Items Receipt Note</span>
                       <span class="pcoded-mcaret"></span>
                     </a>
                   </li>
@@ -579,7 +568,7 @@
                   </li>
                   {% endif %}
 
-                  {% if perms.home.view_store_issue_note %}
+                  {% if perms.home.view_store_issue_request %}
                   <li class=" {% if request.path == '/list-store-issue-request/' %} active {% endif %} ">
                     <a href="/list-store-issue-request/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
@@ -832,7 +821,7 @@
                   <span class="pcoded-mcaret"></span>
                 </a>
                 <ul class="pcoded-submenu">
-                  {% if perms.home.view_user %}
+                  {% if perms.home.view_store_product_purchase %}
                   <li class=" dropdown-item  {% if request.path == '/list/' %} active {% endif %}">
                     <a href="#">
                       <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Product Purchase
@@ -840,7 +829,7 @@
                     </a>
                   </li>
                   {% endif %}
-                  {% if perms.home.add_user %}
+                  {% if perms.home.add_product_issue_note %}
                   <li class=" dropdown-item  {% if request.path == '/create/' %} active {% endif %}">
                     <a href="#">
                       <span class="pcoded-mtext fs-5 " data-i18n="nav.basic-components.alert">Product Issue

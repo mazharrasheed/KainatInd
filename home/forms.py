@@ -16,7 +16,7 @@ from crispy_forms.layout import Submit
 from .models import Category,Product,Account,Transaction,GatePassProduct,GatePass,Unit,Sales_Receipt,Inventory
 from .models import Customer,Sales_Receipt_Product,Suppliers,Cheque,Employee,Product_Price,Project,Final_Product
 from .models import Store_Issue_Note,Store_Issue_Product,Store_Purchase_Note,Store_Purchase_Product,Finish_Product_Category
-from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company,Final_Product_Note,Final_Product_Note_Product
+from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company,Final_Product_Note,Final_Product_Note_Product,Price_List
 
 
 class Create_User_Form(UserCreationForm):
@@ -53,6 +53,12 @@ class RegionForm(forms.ModelForm):
 
     class Meta:
         model = Region
+        fields = ['name']
+
+class Price_ListForm(forms.ModelForm):
+
+    class Meta:
+        model = Price_List
         fields = ['name']
 
 class CopanyForm(forms.ModelForm):
@@ -194,27 +200,21 @@ class Final_Product_PriceForm(forms.ModelForm):
         queryset=Final_Product.objects.filter(is_deleted=False),
         empty_label="Select Product"
     )
-    customer = forms.ModelChoiceField(
-        queryset=Customer.objects.filter(is_deleted=False),
-        empty_label="Select Customer",
-        required=False
-    )
-    region = forms.ModelChoiceField(
-        queryset=Region.objects.filter(is_deleted=False),
-        empty_label="Select Region",
-        required=False
+    price_list = forms.ModelChoiceField(
+        queryset=Price_List.objects.filter(is_deleted=False),
+        empty_label="Select Price List",
+        required=True
     )
 
     class Meta:
         model = Final_Product_Price
-        fields = ['product', 'region', 'customer', 'price']
+        fields = ['product', 'price_list', 'price']
 
     def __init__(self, *args, **kwargs):
         category = kwargs.pop('category', None)
         super(Final_Product_PriceForm, self).__init__(*args, **kwargs)
-
+        self.fields['price_list'].label="Price List"
         # Filter products by category if provided
-
         print('category from forms',category)
         if category:
             self.fields['product'].queryset = Final_Product.objects.filter(
@@ -232,31 +232,18 @@ class Final_Product_PriceForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         product = cleaned_data.get("product")
-        customer = cleaned_data.get("customer")
-        region = cleaned_data.get("region")
-
+        price_list = cleaned_data.get("price_list")
         # Rule 1: At least one must be provided
-        if not customer and not region:
+        if not price_list :
             raise forms.ValidationError("Either a Region or a Customer must be selected.")
-
         # Rule 2: Prevent duplicate for same product + customer
-        if customer and Final_Product_Price.objects.filter(
-            product=product, customer=customer, is_deleted=False
+        if price_list and Final_Product_Price.objects.filter(
+            product=product, price_list=price_list, is_deleted=False
         ).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(
-                f"A price already exists for product '{product}' and customer '{customer}'."
+                f"A price already exists for product '{product}' and price_list '{price_list}'."
             )
-
-        # Rule 3: Prevent duplicate for same product + region
-        if region and Final_Product_Price.objects.filter(
-            product=product, region=region, is_deleted=False
-        ).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(
-                f"A price already exists for product '{product}' and region '{region}'."
-            )
-
         return cleaned_data
-
 
 class search_Product_PriceForm(forms.Form):
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")

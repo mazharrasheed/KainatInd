@@ -3,7 +3,7 @@ from django.urls import  path
 from home.views import category,product
 from home.views import users,views,accounts,store_issue,store_purchase,finished_product,finished_pro_category
 from home.views import gatepass,sales,suppliers,customers,cheques,employees,prices,company,store_issue_request
-from home.views import regions,final_product_note
+from home.views import regions,final_product_note,price_list
 from home.models import Category
 from django.conf.urls.static import static
 
@@ -40,6 +40,12 @@ urlpatterns = [
     path('region/', regions.add_Region , name="region"),
     path('region/<int:id>', regions.edit_region , name="editregion"),
     path('deleteregion/<int:id>',regions.delete_region , name="deleteregion"),
+
+# Price List
+    path('prices_list/', price_list.add_pricelist , name="pricelist"),
+    path('price_list_detail/<int:id>', price_list.pricelist_detail , name="pricelistdetail"),
+    path('addd_price_list/<int:id>', price_list.edit_pricelist , name="editpricelist"),
+    path('delete_price_list/<int:id>',price_list.delete_pricelist , name="deletepricelist"),
 
 # Product Category
     path('category/', category.add_category , name="category"),

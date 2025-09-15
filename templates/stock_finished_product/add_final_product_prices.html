@@ -25,7 +25,7 @@ Add Product Prices {% endblock title %}
 
 
             <div class="col-md-4 offset-md-2 ">
-              <h3 class="text-center alert alert-info">Add Product Price</h3>
+              <h3 class=""> Product Price</h3>
               <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{form|crispy}}
@@ -48,7 +48,7 @@ Add Product Prices {% endblock title %}
           </div>
 
           <div class="col-12 text-center mt-5">
-            <h3 class="text-center alert alert-info">Products List</h3>
+            <h3 class="text-center alert alert-info">Products Prices </h3>
 
             {% if mydata %}
             <table class="table table-stripped table-bordered" id="petrol-table">
@@ -56,7 +56,7 @@ Add Product Prices {% endblock title %}
                 <col width="5%">
                 <col width="15%">
                 <col width="15%">
-                <col width="15%">
+                
                 {% if perms.home.change_product or perms.home.delete_product %}
                 {% if update %} {% else %}
                 <col width="20%"> {% endif %}
@@ -66,9 +66,8 @@ Add Product Prices {% endblock title %}
                 <tr class="bg-primary bg-gradient text-light text-center">
                   <td class="text-center fs-5">Sr.No.</td>
                   <td class="text-center fs-5">Product</td>
-                  <td class="text-center fs-5">Customer</td>
-                  <td class="text-center fs-5">Region</td>
-
+                  <td class="text-center fs-5">Price List</td>
+                  
                   {% if perms.home.change_fianl_product_price or perms.home.final_delete_product_price %}
                   {% if update %} {% else %}<td class="text-center fs-5">Action</td> {% endif %}
                   {% endif %}
@@ -81,14 +80,9 @@ Add Product Prices {% endblock title %}
                 <tr>
                   <td class="text-center">{{mydata.id}}</td>
                   <td class="text-center">{{mydata.product.productname|capitalize_after_space}}</td>
-                  {% if mydata.customer %}
-                  <td class="">{{mydata.customer.name|capitalize_after_space}} -- {{mydata.price}} </td>
-                  {% endif %}
-
-                  {% if mydata.region.name%}
-                    <td class="text-center">{{mydata.region.name|capitalize_after_space}} -- {{mydata.price}}</td>
-                  {% endif %}
-                  
+                
+                  <td class="">{{mydata.price_list.name|capitalize_after_space}} -- {{mydata.price}} </td>
+               
 
                 </tr>
                 {% else %}
@@ -98,23 +92,8 @@ Add Product Prices {% endblock title %}
                   <td class="text-center fs-5">{{forloop.counter}}</td>
                   <td class="text-center">{{data.product.productname|capitalize_after_space}}</td>
                   <td class="">
-                    {{data.customer.coname|capitalize_after_space}} --
-                    {% if data.customer.coname %}
-                    Price = {{data.price}}
-                    {% endif %}
-
+                    {{data.price_list|capitalize_after_space}} -- Price = {{data.price}}
                   </td>
-
-                  <td class="text-center"> {{data.region.name}} --
-
-                    {% if data.region.name %}
-                    Price = {{data.price}}
-                    {% endif %}
-
-
-                  </td>
-
-
                   {% if perms.home.change_product_price %}
                   <td class="text-center">
                     <a class="btn btn-sm btn-warning fs-5" href={% url 'editfinalproductprice' id=data.id %}>Edit</a>

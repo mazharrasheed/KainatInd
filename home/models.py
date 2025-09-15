@@ -33,6 +33,13 @@ class Region(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Price_List(models.Model):
+    name = models.CharField(max_length=100)
+    is_deleted=models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
@@ -160,10 +167,11 @@ class Customer(models.Model):
 
 class Final_Product_Price(models.Model):
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='final_product_price')
-    region = models.ForeignKey(Region, on_delete=models.RESTRICT,null=True ,blank=True)
-    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT,null=True ,blank=True)
+    price_list = models.ForeignKey(Price_List, on_delete=models.RESTRICT,related_name='final_pro_price')
     price = models.FloatField()
     is_deleted=models.BooleanField(default=False)
+    def __str__(self):
+        return 'final_product_price'
 
 
 class Final_Product_Note(models.Model):
