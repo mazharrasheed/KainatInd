@@ -40,7 +40,7 @@ class Company(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class Project(models.Model):
     name = models.CharField(max_length=100)
@@ -108,7 +108,7 @@ class Final_Product(models.Model):
                 return None
             except Product_Price.DoesNotExist:
                 return None
-            
+
         def get_price_for_customer(self, customer):
             # Get the price for this product for a specific customer
             try:
@@ -155,7 +155,6 @@ class Customer(models.Model):
         # return f"{self.coname.capitalize()} "
 
     def get_customer_region(self):
-
         if self.region:
             return self.region.id
 
@@ -534,13 +533,14 @@ class Account(models.Model):
     is_deleted=models.BooleanField(default=False)
     def __str__(self):
         if self.name:
-            return f'{self.name}'
+            return str(self.name)
         elif self.customer:
-            return f'{self.customer}'
+            return str(self.customer)
         elif self.supplier:
-            return f'{self.supplier}'
+            return str(self.supplier)
         elif self.cheque:
-            return f'{self.cheque}'
+            return str(self.cheque)
+        return f"Account #{self.id}"
 
 class Transaction(models.Model):
     date = models.DateTimeField(auto_now_add=True)
