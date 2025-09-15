@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
 from home.models import Price_List,Final_Product_Price
-from home.forms import Price_ListForm
+from home.forms import Price_ListForm,Final_Product_PriceForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,permission_required
 
@@ -14,7 +14,7 @@ def pricelist_detail(request,id):
     if price_list:
         mydata=Final_Product_Price.objects.filter(is_deleted=False,price_list_id=price_list.id)
 
-    data={'mydata':mydata,'price_list':True}
+    data={'mydata':mydata, 'price_list':price_list ,'form':Final_Product_PriceForm()}
     return render(request, 'price_list/add_price_list.html', data )
   else:
     return redirect('signin')

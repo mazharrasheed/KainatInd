@@ -21,85 +21,168 @@ Price List
             <div class="page-wrapper">
                 <div class="page-body">
 
+                    {% if price_list %}
 
-
-{% if price_list %}
-    
                     <div class="col-md-12  ">
-                        
-                            <h2 class="text-center alert alert-info"> Prices Lists</h2>
-                            <a class="btn btn-primary" href="/add_final_product_pricemain/">
+
+                        <h2 class="text-center alert alert-info"  > {{price_list.name|capitalize_after_space}}
+                          Product Prices Lists</h2>
+                        <a class="btn btn-primary" href="/add_final_product_pricemain/">
                             <i class="ti-plus"></i> Price
                         </a>
-                            <div class="table-responsive py-4">
-                                {% if mydata %}
-                                <table class="table table-flush " id="datatable">
-                                    <colgroup>
-                                        <col width="10%">
-                                        <col width="60%">
-                                        {% if update %} {% else %}
-                                        <col width="30%"> {% endif %}
-                                    </colgroup>
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th class="border-bottom fw-bolder text-center" scope="col">
-                                                Sr#
-                                            </th>
-                                            <th class="border-bottom fw-bolder text-center" scope="col">
-                                                Name
-                                            </th>
-                                            {% if perms.home.change_price_list or perms.home.delete_price_list %}
-                                            {% if update %} {% else %} <th class="border-bottom fw-bolder text-center"
-                                                scope="col"> Action</th>
-                                            {% endif %}
-                                            {% else %}
-                                            <th class="border-bottom fw-bolder text-center" scope="col"></th>
-                                            {% endif %}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-
-                                        {% if update %}
-                                        <tr>
-                                            <td class="text-center fs-5">{{mydata.id}}</td>
-                                            <td class="text-center fs-5">{{mydata.name}}</td>
-
-                                        </tr>
-                                        {% else %}
-                                        {% for data in mydata %}
-                                        <tr id="gatepass-{{ gatepass.id }}">
-                                            <td class="text-center">{{ forloop.counter }}</td>
-
-                                            <td class="text-center">{{ data.name|title }}</td>
-                                            <td class="text-center">
-                                                {% if perms.home.change_price_list %}
-                                                <a class="btn btn-warning text-light"
-                                                    href="{% url 'editfinalproductprice' id=data.id %}"><i
-                                                        class="ti-pencil-alt"></i>Edit</a>
-                                                        
-                                                {% endif %}
-                                                {% if perms.home.delete_price_list %}
-                                                <a class="btn btn-danger" href="{% url 'deletepricelist' id=data.id %}"
-                                                    onclick="return confirm('Are you sure you want to delete this region?');">
-                                                    <i class="ti-trash"></i> Delete
-                                                </a>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                        {% endfor %}
+                        <div class="table-responsive py-4">
+                            {% if mydata %}
+                            <table class="table table-flush " id="datatable">
+                                <colgroup>
+                                    <col width="10%">
+                                    <col width="30%">
+                                    <col width="30%">
+                                    {% if update %} {% else %}
+                                    <col width="30%"> {% endif %}
+                                </colgroup>
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th class="border-bottom fw-bolder text-center" scope="col">
+                                            Sr#
+                                        </th>
+                                        <th class="border-bottom fw-bolder text-center" scope="col">
+                                            Name
+                                        </th>
+                                        <th class="border-bottom fw-bolder text-center" scope="col">
+                                            price
+                                        </th>
+                                        {% if perms.home.change_price_list or perms.home.delete_price_list %}
+                                        {% if update %} {% else %} <th class="border-bottom fw-bolder text-center"
+                                            scope="col"> Action</th>
                                         {% endif %}
-                                    </tbody>
-                                </table>
-                                {% else %}
-                                <h4 class="text-center alert alert-warning">
-                                    No Record Found
-                                </h4>
-                                {% endif %}
+                                        {% else %}
+                                        <th class="border-bottom fw-bolder text-center" scope="col"></th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    {% if update %}
+                                    <tr>
+                                        <td class="text-center fs-5">{{mydata.id}}</td>
+                                        <td class="text-center fs-5">{{mydata.name}}</td>
+
+                                    </tr>
+                                    {% else %}
+                                    {% for data in mydata %}
+                                    <tr>
+                                        <td class="text-center">{{ forloop.counter }} </td>
+
+                                        <td class="text-center">{{ data.product|title }} {{ data.product.id }} </td>
+                                        <td class="text-center">{{ data.price|title }}</td>
+                                        <td class="text-center">
+                                            {% if perms.home.change_price_list %}
+                                            <a class="btn btn-warning text-light edit"
+                                            data-bs-toggle="modal" data-bs-target="#myModal"
+                                            id="{{ data.id }}"
+                                            data-product="{{ data.product.id }}"
+                                            data-price="{{ data.price }}"
+                                            data-pricelist="{{price_list.id}}"
+                                                href="{% url 'editfinalproductpricemain' id=data.id %}"><i
+                                                    class="ti-pencil-alt"></i>Edit</a>
+
+                                            {% endif %}
+                                            {% if perms.home.delete_price_list %}
+                                            <a class="btn btn-danger" href="{% url 'deletepricelist' id=data.id %}"
+                                                onclick="return confirm('Are you sure you want to delete this region?');">
+                                                <i class="ti-trash"></i> Delete
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    {% endfor %}
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <h4 class="text-center alert alert-warning">
+                                No Record Found
+                            </h4>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <!-- Modal -->
+                    <script>
+
+                       $(document).on("click", ".edit", function (e) {
+                            e.preventDefault();
+
+                            let btn = $(this);
+
+                            // get values from button
+                            let url = btn.attr("href");
+                            let product = btn.data("product");
+                            let price = btn.data("price");
+                            let price_list = btn.data("pricelist");
+
+                            // set form action
+                            $("#modal-form").attr("action", url);
+
+                            // set inputs in modal
+                            $("#modal-product").val(product);
+                            $("#modal-price").val(price);
+                            $("#modal-pricelist").val(price_list);
+
+                            // show modal
+                            $("#myModal").modal("show");
+                        });
+                    </script>
+
+
+                    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+
+                                <form method="POST" action='#' id="modal-form">
+
+                                    {% csrf_token %}
+                                   
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="myModalLabel">Edit Product Price for
+                                            {{price_list.name|capitalize_after_space}}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <!-- Input fields -->
+                                        <div class="mb-3">
+                                            <label for="pricelist" class="form-label">Product List</label>
+                                            <input hidden type="text" name="pricelist" class="form-control" id="modal-pricelist" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="product" class="form-label">Product</label>
+                                            <input type="text" name="product" class="form-control" id="modal-product" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="price" class="form-label">Price</label>
+                                            <input type="text" name="price" class="form-control" id="modal-price">
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </form>
+
                             </div>
                         </div>
+                    </div>
 
-{% else %}
+
+                    {% else %}
 
 
 
@@ -166,7 +249,10 @@ Price List
                                             <td class="text-center">{{ data.name|title }}</td>
                                             <td class="text-center">
                                                 {% if perms.home.view_price_list %}
-                                                <a class="fs-5 btn btn-sm btn-info pt-1 pb-1  p-2" style=" margin-right: 0px !important; " href={% url 'pricelistdetail' id=data.id %}><i style="margin-right: 2px !important; " class="ti-list "></i></a>
+                                                <a class="fs-5 btn btn-sm btn-info pt-1 pb-1  p-2"
+                                                    style=" margin-right: 0px !important; " href={%url 'pricelistdetail' id=data.id %}>
+                                                    <i
+                                                        style="margin-right: 2px !important; " class="ti-list "></i></a>
                                                 {% endif %}
 
                                                 {% if perms.home.change_price_list %}
@@ -177,7 +263,7 @@ Price List
 
                                                 {% if perms.home.delete_price_list %}
                                                 <a class="btn btn-danger" href="{% url 'deletepricelist' id=data.id %}"
-                                                    onclick="return confirm('Are you sure you want to delete this region?');">
+                                                    onclick="return confirm('Are you sure you want to delete this price list?');">
                                                     <i class="ti-trash"></i> Delete
                                                 </a>
                                                 {% endif %}
@@ -197,7 +283,7 @@ Price List
                         </div>
                     </div>
                 </div>
-{% endif %}
+                {% endif %}
 
                 <script>
                     $(document).ready(function () {

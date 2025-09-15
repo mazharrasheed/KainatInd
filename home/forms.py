@@ -235,7 +235,7 @@ class Final_Product_PriceForm(forms.ModelForm):
         price_list = cleaned_data.get("price_list")
         # Rule 1: At least one must be provided
         if not price_list :
-            raise forms.ValidationError("Either a Region or a Customer must be selected.")
+            raise forms.ValidationError("Price list must be selected.")
         # Rule 2: Prevent duplicate for same product + customer
         if price_list and Final_Product_Price.objects.filter(
             product=product, price_list=price_list, is_deleted=False

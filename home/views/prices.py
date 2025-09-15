@@ -202,6 +202,33 @@ def add_final_product_pricemain(request):
     return render(request, 'stock_finished_product/add_final_product_prices.html', data)
 
 @login_required
+@permission_required('home.add_final_product_price', login_url='/login/')
+def edit_final_product_pricemain(request, id):
+    if request.method == 'POST':
+        # get raw string values
+        id = request.POST['pricelist']
+        product_id = request.POST['product']
+        price = request.POST['price']
+
+        # convert to correct types
+        id = int(id)  
+        product_id = int(product_id)  
+        price = float(price)  
+
+        print(type(id),'list')       # <class 'int'>
+        print(type(product_id),'pro') # <class 'int'>
+        print(type(price),'price')    # <class 'float'>
+
+        print(id, product_id, price)
+
+        # ✅ Update record instead of re-creating
+        data=Final_Product_Price.objects.filter(price_list_id=id, product_id=product_id).update(
+            product_id=product_id,
+            price=price)
+        print(data)
+        return redirect('pricelistdetail' , id=id )
+
+@login_required
 @permission_required('home.change_product_price', login_url='/login/')
 def edit_final_product_price(request,id):
     print("dfsdfdsfs")
