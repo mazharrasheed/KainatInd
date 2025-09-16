@@ -16,7 +16,7 @@ from crispy_forms.layout import Submit
 from .models import Category,Product,Account,Transaction,GatePassProduct,GatePass,Unit,Sales_Receipt,Inventory
 from .models import Customer,Sales_Receipt_Product,Suppliers,Cheque,Employee,Product_Price,Project,Final_Product
 from .models import Store_Issue_Note,Store_Issue_Product,Store_Purchase_Note,Store_Purchase_Product,Finish_Product_Category
-from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company,Final_Product_Note,Final_Product_Note_Product,Price_List
+from .models import Store_Issue_Request,Store_Issue_Request_Product,Region,Final_Product_Price,Company,Final_Product_Note,Final_Product_Note_Product,Price_List,Price_List_Note,Price_List_Note_Products
 
 
 class Create_User_Form(UserCreationForm):
@@ -195,6 +195,8 @@ class Product_PriceForm(forms.ModelForm):
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
 
+
+
 class Final_Product_PriceForm(forms.ModelForm):
     product = forms.ModelChoiceField(
         queryset=Final_Product.objects.filter(is_deleted=False),
@@ -221,7 +223,6 @@ class Final_Product_PriceForm(forms.ModelForm):
                 category_id=category.id if hasattr(category, "id") else category,
                 is_deleted=False
             )
-
         placeholders = {
             'price': 'Enter final product price',
         }
@@ -244,6 +245,69 @@ class Final_Product_PriceForm(forms.ModelForm):
                 f"A price already exists for product '{product}' and price_list '{price_list}'."
             )
         return cleaned_data
+    
+
+# price list note 
+
+class PriceListNoteForm(forms.ModelForm):
+    price_list = forms.ModelChoiceField(
+        queryset=Price_List.objects.filter(is_deleted=False),
+        empty_label="Select Price List"
+    )
+
+    class Meta:
+        model = Price_List_Note
+        fields = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            first_price_list = self.instance.price_list.first()
+            if first_price_list:
+                self.fields['price_list'].initial = first_price_list
+
+        # Add 'fs-5' class to all fields' labels
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
+
+
+class PriceListNoteProductForm(forms.ModelForm):
+    product = forms.ModelChoiceField(
+        queryset=Final_Product.objects.filter(is_deleted=False),
+        empty_label="Select Product"
+    )
+    price = forms.FloatField(min_value=0, label="Price")
+
+    class Meta:
+        model = Price_List_Note_Products
+        fields = ['product', 'price']
+
+    def __init__(self, *args, **kwargs):
+        self.note = kwargs.pop('note', None)
+        super().__init__(*args, **kwargs)
+
+        print(kwargs)
+
+        placeholders = {
+            'price': 'Enter Price',
+        }
+        for field_name, placeholder in placeholders.items():
+            self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+        # Add 'fs-5' class to all fields' labels
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        product = cleaned_data.get('product')
+        if product and self.note:
+            if Price_List_Note_Products.objects.filter(price_list_note=self.note, product=product).exists():
+                self.add_error('product', f'The product "{product}" has already been added to this note.')
+        return cleaned_data
+
 
 class search_Product_PriceForm(forms.Form):
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
@@ -309,8 +373,6 @@ class Store_Issue_Request_Form(forms.ModelForm):
         if self.instance and self.instance.pk:
             # Set the initial value of customer_name
             self.fields['project'].initial = self.instance.project
-
-
 
 class Store_Issue_Request_ProductForm(forms.ModelForm):
 

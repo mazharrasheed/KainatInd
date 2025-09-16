@@ -24,12 +24,17 @@ Price List
                     {% if price_list %}
 
                     <div class="col-md-12  ">
-
                         <h2 class="text-center alert alert-info"  > {{price_list.name|capitalize_after_space}}
                           Product Prices Lists</h2>
-                        <a class="btn btn-primary" href="/add_final_product_pricemain/">
-                            <i class="ti-plus"></i> Price
+                          {% if not mydata %}
+                        <a class="btn btn-primary" href="/create-price-list-note/{{price_list.id}}?price_list={{price_list.id}}">
+                            <i class="ti-plus"></i> Products to Price List
                         </a>
+                        {% else %}
+                        <a class="btn btn-primary" href="/edit-price-list-note/{{price_list_note_id}}?price_list={{price_list.id}}">
+                            <i class="ti-pencil-alt"></i> Price List
+                        </a>
+                        {% endif %}
                         <div class="table-responsive py-4">
                             {% if mydata %}
                             <table class="table table-flush " id="datatable">
@@ -81,9 +86,10 @@ Price List
                                             data-bs-toggle="modal" data-bs-target="#myModal"
                                             id="{{ data.id }}"
                                             data-product="{{ data.product.id }}"
+                                            data-product-name="{{ data.product.productname }}"
                                             data-price="{{ data.price }}"
                                             data-pricelist="{{price_list.id}}"
-                                                href="{% url 'editfinalproductpricemain' id=data.id %}"><i
+                                                href="{% url 'editfinalproductprice' id=data.id %}"><i
                                                     class="ti-pencil-alt"></i>Edit</a>
 
                                             {% endif %}
@@ -102,7 +108,7 @@ Price List
                             </table>
                             {% else %}
                             <h4 class="text-center alert alert-warning">
-                                No Record Found
+                                No Product Prices Record Found
                             </h4>
                             {% endif %}
                         </div>
@@ -119,17 +125,16 @@ Price List
                             // get values from button
                             let url = btn.attr("href");
                             let product = btn.data("product");
+                            let productName = btn.data("product-name");
                             let price = btn.data("price");
                             let price_list = btn.data("pricelist");
-
                             // set form action
                             $("#modal-form").attr("action", url);
-
                             // set inputs in modal
                             $("#modal-product").val(product);
                             $("#modal-price").val(price);
                             $("#modal-pricelist").val(price_list);
-
+                            $("#product-label").html(productName )
                             // show modal
                             $("#myModal").modal("show");
                         });
@@ -155,13 +160,14 @@ Price List
                                     <div class="modal-body">
                                         <!-- Input fields -->
                                         <div class="mb-3">
-                                            <label for="pricelist" class="form-label">Product List</label>
+                                            <label id="product-label" for="pricelist" class="form-label">Product List</label>
                                             <input hidden type="text" name="pricelist" class="form-control" id="modal-pricelist" required>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="product" class="form-label">Product</label>
-                                            <input type="text" name="product" class="form-control" id="modal-product" required>
+                                            <label for="product" hidden class="form-label">Product</label>
+                                            <input type="text" hidden name="product" class="form-control" id="modal-product" required>
+                                        
                                         </div>
 
                                         <div class="mb-3">

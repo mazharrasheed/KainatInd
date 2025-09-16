@@ -519,15 +519,16 @@
                   {% endif %}
 
                   
-                  {% if perms.home.view_final_product_price %}
+                  <!-- {% if perms.home.view_final_product_price %}
                   <li class="{% if request.path == '/add_final_product_pricemain/' %} active {% endif %} ">
-                    <a href="/add_final_product_pricemain/">
+                    <a href="/add_final_product_price/">
                       <span class="pcoded-micon"><i class="ti-angle-right"></i></span>
                       <span class="pcoded-mtext fs-5" data-i18n="nav.basic-components.alert">Prices</span>
                       <span class="pcoded-mcaret"></span>
                     </a>
                   </li>
-                   {% endif %}
+                  {% endif %} -->
+                  
                   {% if perms.home.view_price_list %}
                   <li class="{% if request.path == '/list_product_price/' %} active {% endif %} ">
                     <a href="/prices_list/">

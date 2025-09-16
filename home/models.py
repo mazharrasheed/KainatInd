@@ -34,13 +34,6 @@ class Region(models.Model):
     def __str__(self):
         return self.name
     
-class Price_List(models.Model):
-    name = models.CharField(max_length=100)
-    is_deleted=models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
 class Company(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
@@ -165,6 +158,24 @@ class Customer(models.Model):
         if self.region:
             return self.region.id
 
+class Price_List(models.Model):
+    name = models.CharField(max_length=100)
+    is_deleted=models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+class Price_List_Note(models.Model):
+    price_list = models.ManyToManyField(Price_List, through='Price_List_Note_products')
+    created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+class Price_List_Note_Products(models.Model):
+    price_list_note = models.ForeignKey(Price_List_Note, on_delete=models.RESTRICT)
+    price_list=models.ForeignKey(Price_List,on_delete=models.RESTRICT)
+    product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
+    price = models.FloatField()
+
 class Final_Product_Price(models.Model):
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='final_product_price')
     price_list = models.ForeignKey(Price_List, on_delete=models.RESTRICT,related_name='final_pro_price')
@@ -172,6 +183,7 @@ class Final_Product_Price(models.Model):
     is_deleted=models.BooleanField(default=False)
     def __str__(self):
         return 'final_product_price'
+
 
 
 class Final_Product_Note(models.Model):

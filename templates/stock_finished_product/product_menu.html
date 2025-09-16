@@ -41,10 +41,6 @@
       <i class="ti-plus"></i> Products</a>
   </li>
 
-  <li  class="nav-item " style="line-height:2;">
-    <a class="nav-link p-2" href="{% url 'addfinalproductprice' category.id %}" class="list-group-item">
-      <i class="ti-plus me-1"></i> Price</a>
-  </li>
 
   <!-- <li class="nav-item">
     <a class="nav-link p-1 " href="{% url 'addproductprice' category.id %}" class="list-group-item">
@@ -59,7 +55,6 @@
   {% endif %}
   {% endfor %}
 
-
   <!-- main page Links -->
   {% elif add_category or category_selected == False %}
   {% if perms.home.add_category %}
@@ -72,20 +67,6 @@
       <i class="ti-plus me-1"></i>Product</a>
   </li>
 
-  <li  class="nav-item " style="line-height:2;">
-    <a class="nav-link p-2" href="{% url 'addfinalproductpricemain' %}" class="list-group-item">
-      <i class="ti-plus"></i> Price</a>
-  </li>
-  <li  class="nav-item " style="line-height:2;">
-    <a class="nav-link p-2 " href="/list_product_price/?region=True" class="list-group-item">
-      <i class="ti-info-alt"></i> Regionl Price List</a>
-  </li>
-
-  <li  class="nav-item " style="line-height:2;">
-    <a class="nav-link p-2 " href="/list_product_price/?customer=True" class="list-group-item">
-      <i class="ti-info-alt"></i> Customer Price List</a>
-  </li>
- 
   {% endif %}
   {% endif %}
 
@@ -98,50 +79,3 @@
   {% endif %}
   </li>
 </ul>
-
-
-
-
-<!-- 
-
-
-<div class="col-lg-3">
-    <h3 class="text-center alert alert-info">Product Menu</h3>
-    <div class="list-group">
-
-      <h4 class="bg-primary bg-gradient alert-info rounded  p-3 "><a class="text-light" href="/finished_product/" class="list-group-item">All Products</a></h4>
-      {% if not prod %}
-      {% for category in categories %}
-      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="?category={{category.id}}" class="list-group-item">{{category.name}}</a></h4>
-      {% endfor %}
-      {% endif %}
-
-      
-      {% if category_selected %}
-
-      {% for category in categories %}
-      {% if perms.home.add_product %}
-      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light" href="/add-finished-product?category={{category.id}}" class="list-group-item">Add Product</a></h4>  
-      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light " href="{% url 'addfinalproductprice' category.id %}" class="list-group-item">
-      Add Product Price
-    </a></h4>  
-      
-      {% endif %}
-      {% endfor %}
-     
-      {% elif add_category or category_selected == False %}
-      {% if perms.home.add_category %}
-      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light" href="/finished-product-category/" class="list-group-item">Add Category</a></h4>
-      {% endif %}
-      {% endif %}
-
-      {% if prod %}
-
-      {% for category in categories %}
-      <h4 class="bg-primary bg-gradient rounded p-3 "><a class="text-light"  href="/finished_product?category={{category.id}}" class="list-group-item">{{category.name}}</a></h4>
-      
-      {% endfor %}
-      {% endif %}
- 
-    </div>
-  </div> -->

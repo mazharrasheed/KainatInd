@@ -47,6 +47,13 @@ urlpatterns = [
     path('addd_price_list/<int:id>', price_list.edit_pricelist , name="editpricelist"),
     path('delete_price_list/<int:id>',price_list.delete_pricelist , name="deletepricelist"),
 
+# Price List Note
+
+    path('create-price-list-note/', price_list.create_price_list_note, name='create_price_list_note'),
+    path('create-price-list-note/<int:id>', price_list.create_price_list_note, name='create_price_list_note'),
+    path('edit-price-list-note/<int:id>', price_list.edit_price_list_note, name='edit_price_list_note'),
+    path('edit_final_product_price/<int:id>', price_list.edit_final_product_price, name="editfinalproductprice"),
+
 # Product Category
     path('category/', category.add_category , name="category"),
     path('category/<int:id>', category.edit_category , name="editcategory"),
