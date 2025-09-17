@@ -249,6 +249,65 @@ class Final_Product_PriceForm(forms.ModelForm):
 
 # price list note 
 
+# class PriceListNoteForm(forms.ModelForm):
+#     price_list = forms.ModelChoiceField(
+#         queryset=Price_List.objects.filter(is_deleted=False),
+#         empty_label="Select Price List"
+#     )
+
+#     class Meta:
+#         model = Price_List_Note
+#         fields = []
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         if self.instance and self.instance.pk:
+#             first_price_list = self.instance.price_list.first()
+#             if first_price_list:
+#                 self.fields['price_list'].initial = first_price_list
+
+#         # Add 'fs-5' class to all fields' labels
+#         for field_name in self.fields:
+#             self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+#             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
+
+
+# class PriceListNoteProductForm(forms.ModelForm):
+#     product = forms.ModelChoiceField(
+#         queryset=Final_Product.objects.filter(is_deleted=False),
+#         empty_label="Select Product"
+#     )
+#     price = forms.FloatField(min_value=0, label="Price")
+
+#     class Meta:
+#         model = Price_List_Note_Products
+#         fields = ['product', 'price']
+
+#     def __init__(self, *args, **kwargs):
+#         self.note = kwargs.pop('note', None)
+#         super().__init__(*args, **kwargs)
+
+#         print(kwargs)
+
+#         placeholders = {
+#             'price': 'Enter Price',
+#         }
+#         for field_name, placeholder in placeholders.items():
+#             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
+
+#         # Add 'fs-5' class to all fields' labels
+#         for field_name in self.fields:
+#             self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+#             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         product = cleaned_data.get('product')
+#         if product and self.note:
+#             if Price_List_Note_Products.objects.filter(price_list_note=self.note, product=product).exists():
+#                 self.add_error('product', f'The product "{product}" has already been added to this note.')
+#         return cleaned_data
+
 class PriceListNoteForm(forms.ModelForm):
     price_list = forms.ModelChoiceField(
         queryset=Price_List.objects.filter(is_deleted=False),
@@ -257,18 +316,16 @@ class PriceListNoteForm(forms.ModelForm):
 
     class Meta:
         model = Price_List_Note
-        fields = []
+        fields = ['price_list']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            first_price_list = self.instance.price_list.first()
-            if first_price_list:
-                self.fields['price_list'].initial = first_price_list
 
-        # Add 'fs-5' class to all fields' labels
+        if self.instance and self.instance.pk:
+            self.fields['price_list'].initial = self.instance.price_list
+
         for field_name in self.fields:
-            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})
             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
 
 
@@ -287,17 +344,12 @@ class PriceListNoteProductForm(forms.ModelForm):
         self.note = kwargs.pop('note', None)
         super().__init__(*args, **kwargs)
 
-        print(kwargs)
-
-        placeholders = {
-            'price': 'Enter Price',
-        }
+        placeholders = {'price': 'Enter Price'}
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
 
-        # Add 'fs-5' class to all fields' labels
         for field_name in self.fields:
-            self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})
             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
 
     def clean(self):
@@ -307,6 +359,10 @@ class PriceListNoteProductForm(forms.ModelForm):
             if Price_List_Note_Products.objects.filter(price_list_note=self.note, product=product).exists():
                 self.add_error('product', f'The product "{product}" has already been added to this note.')
         return cleaned_data
+
+
+
+
 
 
 class search_Product_PriceForm(forms.Form):

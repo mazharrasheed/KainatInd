@@ -166,7 +166,8 @@ class Price_List(models.Model):
         return self.name
 
 class Price_List_Note(models.Model):
-    price_list = models.ManyToManyField(Price_List, through='Price_List_Note_products')
+    products = models.ManyToManyField(Final_Product, through='Price_List_Note_Products')
+    price_list = models.ForeignKey(Price_List ,on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 

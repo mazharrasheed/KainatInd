@@ -1,75 +1,35 @@
 {% extends 'css-js-links.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 
-{% block title %}
-Edit Price List Note
-{% endblock title %}
+{% block title %} Edit Price List Note {% endblock title %}
 
 {% block context %}
 {% if request.user.is_superuser %}
-  {% include 'navbar.html' %}
+  {% include 'navbar.html' %} 
 {% else %}
-  {% include 'store/navbar.html' %}
+  {% include 'store/navbar.html' %} 
 {% endif %}
 {% endblock context %}
 
 {% block body %}
-
 <style>
-  body {
-    font-family: Arial, sans-serif;
-  }
-
+  body { font-family: Arial, sans-serif; }
   .table-container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #000;
-    background-color: #f8f9fa;
+      width: 70%;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #000;
+      background-color: #f8f9fa;
   }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    border: 1px solid #000;
-    padding: 8px;
-    text-align: center;
-  }
-
-  th {
-    background-color: #343a40;
-    color: #fff;
-  }
-
-  .btn {
-    margin: 5px;
-  }
-
-  .header-section,
-  .footer-section {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .footer-section button {
-    width: 100%;
-  }
-
-  .header-section div {
-    width: 45%;
-  }
-
-  .bg-dark {
-    background-color: #343a40 !important;
-  }
-
-  .text-light {
-    color: #fff !important;
-  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+  th { background-color: #343a40; color: #fff; }
+  .btn { margin: 5px; }
+  .header-section, .footer-section { display: flex; justify-content: space-between; }
+  .footer-section button { width: 50%; }
+  .header-section div { width: 45%; }
+  .bg-dark { background-color: #343a40 !important; }
+  .text-light { color: #fff !important; }
 </style>
 
 <div class="pcoded-content">
@@ -78,35 +38,28 @@ Edit Price List Note
       <div class="page-wrapper">
         <div class="page-body">
           <div class="table-container">
-            <h3 class="text-center bg-dark text-light p-3">
-              Edit Price List Note
-            </h3>
-            <form id="pln-form" method="POST">
+            <h3 class="text-center bg-dark text-light p-3">Edit Price List Note</h3>
+            <form id="price_note-form" method="POST">
               {% csrf_token %}
               <div class="header-section">
                 <div>
                   <h4>MASH Systems</h4>
                   <h6>Gujranwala</h6>
-                  <h6>Phone: 0301-8742840</h6>
+                  <h6>Cell: 0301-8742840</h6>
                 </div>
-                <div style="margin-right: 50px; width: 550px">
-                  <p>{{ form.price_list|as_crispy_field }}</p>
-                 
+                <div style="margin-right:50px;width:350px">
+                  <p><strong>Date:</strong> {{ note.date_created|date:"Y-m-d H:i" }}</p>
+                  <div style="width: 300px !important;">{{ form_note.price_list }}</div>
                 </div>
               </div>
+
               <table>
                 <thead>
                   <tr>
-                    <td>{{ product_form.product|as_crispy_field }}</td>
-                    <td>{{ product_form.price|as_crispy_field }}</td>
+                    <td>{{ form.product }}</td>
+                    <td>{{ form.price }}</td>
                     <td>
-                      <button
-                        id="add-product"
-                        class="btn btn-primary"
-                        type="button"
-                      >
-                        Add Product
-                      </button>
+                      <button id="add-product" class="btn btn-primary" type="button">Add Product</button>
                     </td>
                   </tr>
                   <tr>
@@ -115,139 +68,97 @@ Edit Price List Note
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="product-list">
-                  {% for product in products %}
-                  <tr>
-                    <td>{{ product.product }}</td>
-                    <td>{{ product.price }}</td>
-                    <td>
-                      <button
-                        class="delete-product btn btn-danger"
-                        data-product-id="{{ product.product.id }}"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
+                <tbody id="product-list"></tbody>
               </table>
-              <button id="update-pln" class="btn btn-success">
-                Update Price List Note
-              </button>
-              <a href="/price_list_detail/{{price_list_id}}" class="btn btn-warning">Cancel</a>
-            </form>
+              
+              <button id="finalize-price-note" class="btn btn-success">Update Price List Note</button>
+              <a href="/list-price-list-notes/" class="btn btn-warning">Cancel</a>
+            </form>          
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  // Initialize productList with existing products from the template
-  let productList = [
-      {% for product in products %}
-          { product: '{{ product.product.id }}', price: '{{ product.price }}' },
-      {% endfor %}
-  ];
+  $(document).ready(function () {
+    let productList = [];
 
-  let deletedProducts = [];
+    // Load existing products from Django context
+    let existingProducts = {{ existing_products|safe }};
+    existingProducts.forEach((item, index) => {
+      productList.push({ product: item.product__id, price: item.price });
 
-  // Add product event listener
-  document.getElementById('add-product').addEventListener('click', function () {
-      const product = document.querySelector('select[name="product"]').value;
-      const price = document.querySelector('input[name="price"]').value;
+      let row = `<tr>
+                  <td>${item.product__name}</td>
+                  <td>${item.price}</td>
+                  <td><button class="delete-product btn btn-danger" data-index="${index}">Delete</button></td>
+                </tr>`;
+      $('#product-list').append(row);
+    });
 
-      if (!product) {
-          alert('Please select a product.');
-          return;
-      }
-      if (!price || price <= 0) {
-          alert('Please enter a valid price.');
-          return;
-      }
-      // Check if product already exists
+    $('#add-product').on('click', function () {
+      const product = $('select[name="product"]').val();
+      const price = $('input[name="price"]').val();
+
+      if (!product) { alert('Please select a product.'); return; }
+      if (!price || price <= 0) { alert('Please enter a valid price.'); return; }
+
       const existingProduct = productList.find(item => item.product === product);
-      if (existingProduct) {
-          alert('This product is already added.');
-          return;
-      }
+      if (existingProduct) { alert('This product is already in the list.'); return; }
 
       productList.push({ product: product, price: price });
-      const row = `
-          <tr>
-              <td>${document.querySelector('select[name="product"] option:checked').textContent}</td>
-              <td>${price}</td>
-              <td>
-                  <button class="delete-product btn btn-danger" data-product-id="${product}">Delete</button>
-              </td>
-          </tr>
-      `;
-      document.getElementById('product-list').insertAdjacentHTML('beforeend', row);
-  });
 
-  // Delete product event listener
-  document.getElementById('product-list').addEventListener('click', function (event) {
-      if (event.target.classList.contains('delete-product')) {
-          const productId = event.target.getAttribute('data-product-id');
-          if (!deletedProducts.includes(productId)) {
-              deletedProducts.push(productId);
-          }
-          productList = productList.filter(item => item.product !== productId);
-          event.target.closest('tr').remove();
-      }
-  });
+      const row = `<tr>
+                    <td>${$('select[name="product"] option:selected').text()}</td>
+                    <td>${price}</td>
+                    <td><button class="delete-product btn btn-danger" data-index="${productList.length - 1}">Delete</button></td>
+                   </tr>`;
+      $('#product-list').append(row);
+    });
 
-  // Update PL Note event listener
-  document.getElementById('update-pln').addEventListener('click', function (event) {
+    $('#product-list').on('click', '.delete-product', function () {
+      const index = $(this).data('index');
+      productList.splice(index, 1);
+      $(this).closest('tr').remove();
+      $('.delete-product').each(function (i) { $(this).data('index', i); });
+    });
+
+    $('#finalize-price-note').on('click', function (event) {
       event.preventDefault();
 
-      if (productList.length === 0) {
-        alert('Please check your product list is empty.');
-        return;
-      }
+      const price_list = $('select[name="price_list"]').val();
+      if (!price_list) { alert('Please select a Price List.'); return; }
+      if (productList.length === 0) { alert('Please add at least one product.'); return; }
 
-      const form = document.getElementById('pln-form');
+      const form = $('#price_note-form')[0];
       const formData = new FormData(form);
 
-      // Append product data
       productList.forEach(product => {
-          formData.append('products[]', `${product.product}:${product.price}`);
+        formData.append('products[]', `${product.product}:${product.price}`);
       });
 
-      // Append deleted product IDs
-      deletedProducts.forEach(productId => {
-          formData.append('deleted_products[]', productId);
-      });
+      formData.append('finalize', true);
 
-      fetch(form.action, {
-          method: 'POST',
-          body: formData,
-          headers: {
-              'X-Requested-With': 'XMLHttpRequest',
-              'X-CSRFToken': '{{ csrf_token }}',
-          }
-      })
-      .then(response => response.json().catch(() => {
-          throw new Error('Invalid JSON response from server.');
-      }))
-      .then(data => {
+      $.ajax({
+        url: form.action,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function (data) {
           if (data.success) {
-              if (data.redirect_url) {
-                  window.location.href = data.redirect_url;
-              } else {
-                  alert('Update successful, but no redirect URL provided.');
-              }
+            window.location.href = data.redirect_url;
           } else {
-              alert(data.message || 'Failed to update Price List Note.');
+            alert('Failed to update price list note.');
           }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          alert('An unexpected error occurred.');
+        },
+        error: function (error) { console.error('Error:', error); }
       });
+    });
   });
 </script>
-
 {% endblock body %}

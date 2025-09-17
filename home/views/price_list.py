@@ -96,13 +96,16 @@ from django.shortcuts import render
 
 @login_required
 @permission_required('home.add_price_list_note', login_url='/login/')
-def create_price_list_note(request,id):
-    price_list_id=int(request.GET.get('price_list'))
-    print(price_list_id,"fdfsdfds")
+
+
+def create_price_list_note(request, id):
+    price_list_id = int(request.GET.get('price_list', id))  # fallback to id
+    print("Selected PriceList ID:", price_list_id)
+
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        if 'finalize' in request.POST:  
+        if 'finalize' in request.POST:
             form_note = PriceListNoteForm(request.POST)
-            products = request.POST.getlist('products[]')  # product_id:price
+            products = request.POST.getlist('products[]')
 
             if form_note.is_valid() and products:
                 note = form_note.save(commit=False)
@@ -113,7 +116,7 @@ def create_price_list_note(request,id):
                     product_id, price = product_data.split(':')
                     Price_List_Note_Products.objects.create(
                         price_list_note=note,
-                        price_list=form_note.cleaned_data['price_list'],
+                        price_list=note.price_list,  # ✅ use saved note’s price_list
                         product_id=product_id,
                         price=price
                     )
@@ -123,12 +126,14 @@ def create_price_list_note(request,id):
                 return JsonResponse({'success': False, 'errors': 'Invalid form data or no products selected.'})
     else:
         form_product = PriceListNoteProductForm()
-        form_note = PriceListNoteForm()
+        form_note = PriceListNoteForm(initial={'price_list': price_list_id})
 
     return render(request, 'price_list/create_price_list_note.html', {
         'form': form_product,
-        'form_note': form_note,'price_list_id':price_list_id
+        'form_note': form_note,
+        'price_list_id': price_list_id
     })
+
 
 #  Edit Price in price list
 @login_required
@@ -158,51 +163,52 @@ def edit_final_product_price(request, id):
         print(data)
         return redirect('pricelistdetail' , id=id )
     
+
+
 @login_required
-@permission_required('home.change_store_issue_note', login_url='/login/')
+@permission_required('home.change_price_list_note', login_url='/login/')
 
+def edit_price_list_note(request, id):
+    note = get_object_or_404(Price_List_Note, pk=id)
 
-def edit_price_list_note(request,id):
-    price_list_id=int(request.GET.get('price_list'))
-    grn = get_object_or_404(Price_List_Note, id=id)
-    products = Price_List_Note_Products.objects.filter(price_list_note=grn.id)
-    if request.method == 'POST':
-        form = PriceListNoteForm(request.POST, instance=grn)
-        if form.is_valid():
-            grn = form.save()
-            product_data = request.POST.getlist('products[]')
-            deleted_products = request.POST.getlist('deleted_products[]')
-            # Delete removed products
-            Price_List_Note_Products.objects.filter(store_issue_note=grn, product__id__in=deleted_products).delete()
-            product_quantities = defaultdict(int)
-            for product_info in product_data:
-                try:
-                    product_id, quantity = product_info.split(':')
-                    product_quantities[product_id] += int(quantity)
-                except ValueError:
-                    return JsonResponse({'success': False, 'message': 'Invalid product data.'})
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if 'finalize' in request.POST:
+            form_note = PriceListNoteForm(request.POST, instance=note)
+            products = request.POST.getlist('products[]')
 
-            for product_id, total_quantity in product_quantities.items():
-                try:
-                    product_instance = Final_Product.objects.get(id=product_id)
-                    product, created = Price_List_Note_Products.objects.update_or_create(
-                        store_issue_note=grn, 
-                        product=product_instance, 
-                        defaults={'quantity': total_quantity}
+            if form_note.is_valid():
+                note = form_note.save(commit=False)
+                note.created_by = request.user
+                note.save()
+
+                # Clear old products and re-add new ones
+                Price_List_Note_Products.objects.filter(price_list_note=note).delete()
+                for product_data in products:
+                    product_id, price = product_data.split(':')
+                    Price_List_Note_Products.objects.create(
+                        price_list_note=note,
+                        price_list=note.price_list,
+                        product_id=product_id,
+                        price=price
                     )
-                  
-                except Final_Product.DoesNotExist:
-                    return JsonResponse({'success': False, 'message': f'Product with ID {product_id} does not exist.'})
 
-            return JsonResponse({'success': True, 'redirect_url': '/list-store-issue/'})
+                return JsonResponse({'success': True, 'redirect_url': '/list-price-list-notes/'})
+            else:
+                return JsonResponse({'success': False, 'errors': 'Invalid form data.'})
 
-        return JsonResponse({'success': False, 'message': 'Invalid form submission.'})
+    else:
+        form_product = PriceListNoteProductForm(note=note)
+        form_note = PriceListNoteForm(instance=note)
 
-    context = {
-        'grn': grn,
-        'products': products,
-        'form': PriceListNoteForm(instance=grn),
-        'product_form': PriceListNoteProductForm(),
-        'price_list_id':price_list_id
-    }
-    return render(request, 'price_list/edit_price_list_note.html', context)
+        # Existing products for pre-load in JS
+        existing_products = list(
+            Price_List_Note_Products.objects.filter(price_list_note=note)
+            .values('id', 'product__id', 'product__name', 'price')
+        )
+
+    return render(request, 'price_list/edit_price_list_note.html', {
+        'form': form_product,
+        'form_note': form_note,
+        'note': note,
+        'existing_products': existing_products
+    })
