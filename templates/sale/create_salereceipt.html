@@ -89,8 +89,11 @@
                 </div>
                 <div style="margin-right:50px; width:500px">
                   <p><strong>Date:</strong> Auto</p>
-                  <p>{{ form_salereceipt.customer_name|as_crispy_field }}</p>
-                  <p>{{ form_salereceipt.region|as_crispy_field }}</p>
+             
+                  <div style=" width:500px">{{ form_salereceipt.customer_name|as_crispy_field }} 
+                    <h5 id="price_list"> </h5>
+                  </div>
+        
                 </div>
               </div>
 
@@ -138,15 +141,15 @@ $(document).ready(function () {
 product.prop("disabled", true);
 quantity.prop("disabled", true);
 
-
+id_customer_name
 // get stock on product select
 $("#id_product").on("change", (e) => {
   let productId = e.target.value;
   let customerId = $("#id_customer_name").val();   // assuming dropdown with id="id_customer"
-  let regionId   = $("#id_region").val();     // assuming dropdown with id="id_region"
+  // assuming dropdown with id="id_region"
 
   // Check if at least one is selected
-  if (!customerId && !regionId) {
+  if (!customerId ) {
     alert("Please select either a Customer or a Region first.");
     $("#id_product").val(""); // reset product select if nothing chosen
     return;
@@ -155,8 +158,7 @@ $("#id_product").on("change", (e) => {
   // Build query params
   let params = {};
   if (customerId) params.customer = customerId;
-  if (regionId)   params.region = regionId;
-
+ 
   $.ajax({
     url: `/get-stock-final-product/${productId}`,
     method: "GET",
@@ -172,13 +174,44 @@ $("#id_product").on("change", (e) => {
   });
 });
 
+// get Price List
+$("#id_customer_name").on("change", (e) => {
+  let productId = e.target.value;
+  let customerId = $("#id_customer_name").val();   // assuming dropdown with id="id_customer"
+  // assuming dropdown with id="id_region"
+
+  // Check if at least one is selected
+  if (!customerId ) {
+    alert("Please select either a Customer or a Region first.");
+    $("#id_product").val(""); // reset product select if nothing chosen
+    return;
+  }
+
+  // Build query params
+  let params = {};
+  if (customerId) params.customer = customerId;
+ 
+  $.ajax({
+    url: `/get-stock-final-product/${productId}`,
+    method: "GET",
+    data: params,   // send customer/region (or both)
+    success: function (data) {
+      if (data.success) {
+       
+        $("#price_list").text(`Price List : ${data.price_list}`);
+      } else {
+        $("#price_list").text("N/A");
+      }
+    }
+  });
+});
+
 
 
 // Check region for customer
 $("#id_customer_name").on("change", (e) => {
   const product = $('#id_product');
   let quantity = $('#id_quantity');
-  
   let customerId = e.target.value;
   console.log("custeomer selected")
   product.prop("disabled", false);

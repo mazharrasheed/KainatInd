@@ -98,7 +98,7 @@ class Finish_ProductForm(forms.ModelForm):
     class Meta:
         model = Final_Product
         fields = ['productname','unit','category','company','purchase','sale_rate','labour' ]
-        labels={'productname':'Product Name','sale_rate':'Slae Rate'
+        labels={'productname':'Product Name','sale_rate':'Sale Rate'
                 }
 
         widgets = {
@@ -361,10 +361,6 @@ class PriceListNoteProductForm(forms.ModelForm):
         return cleaned_data
 
 
-
-
-
-
 class search_Product_PriceForm(forms.Form):
     product = forms.ModelChoiceField(queryset=Product.objects.filter(is_deleted=False), empty_label="Select Product")
     customer = forms.ModelChoiceField(queryset=Customer.objects.filter(is_deleted=False), empty_label="Select Customer")
@@ -565,22 +561,16 @@ class Sales_ReceiptForm(forms.ModelForm):
         empty_label="Select Customer",
         required=False
     )
-    region = forms.ModelChoiceField(
-        queryset=Region.objects.filter(is_deleted=False),
-        empty_label="Select Region",
-        required=False
-    )
 
     class Meta:
         model = Sales_Receipt
-        fields = ['customer_name', 'region']
+        fields = ['customer_name',]
 
     def __init__(self, *args, **kwargs):
         super(Sales_ReceiptForm, self).__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['customer_name'].initial = self.instance.customer_name
-            self.fields['region'].initial = self.instance.region
-
+            
     def clean(self):
         cleaned_data = super().clean()
         customer = cleaned_data.get("customer_name")
@@ -598,13 +588,6 @@ class Sales_Receipt_ProductForm(forms.ModelForm):
         queryset=Final_Product.objects.filter(
             is_deleted=False,
             product_status=True
-        ).filter(
-            Exists(
-                Final_Product_Price.objects.filter(
-                    product=OuterRef("pk"),
-                    is_deleted=False
-                )
-            )
         ),
         empty_label="Select Product"
     )
@@ -817,7 +800,7 @@ class Customer_form(forms.ModelForm):
 
     class Meta:
         model = Customer
-        fields = ['coname', 'name','region','contact','address']
+        fields = ['coname', 'name','region','contact','address','city','contact','mobile','credit_limit','price_list']
         labels={'coname':'Company Name','name':'Name',
                 'contact':'Contact','address':'Address',}
     def __init__(self, *args, **kwargs):

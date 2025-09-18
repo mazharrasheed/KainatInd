@@ -184,7 +184,7 @@ def edit_final_product_price(request, id):
 @login_required
 @permission_required('home.add_delete_price_list_note_products', login_url='/login/')
 def delete_final_product_price(request,id):
-    mydata=Price_List_Note_Products.objects.get(price_list_note_id=id, product_id=id)
+    mydata=Price_List_Note_Products.objects.get(id=id).delete()
     mydata.save()
     messages.success(request,"Product Price Deleted Successfully from List !!")
     return redirect('pricelistdetail' , id=id )

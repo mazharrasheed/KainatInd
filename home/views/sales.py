@@ -15,16 +15,17 @@ from django.db import IntegrityError
 @login_required
 def get_final_product_stock(request,id):
     print('fdfsfdf')
-    customer = request.GET.get('customer')
-    region = request.GET.get('region')
-    print('customer from getstock ',customer,region ,type(region))
+    customer_id = request.GET.get('customer')
+    print('customer from getstock ',customer_id)
     product=Final_Product.objects.get(id=id)
     stock_qty=product.get_current_stock()
-    product_price=product.get_product_price(customer=customer ,region=region)
+    customer=Customer.objects.get(id=customer_id)
+    print(customer.price_list.name)
+    product_price=product.get_price_for_customer(customer=customer)
     print('from get stock',product_price)
     print(stock_qty)
     print(id,stock_qty)
-    return JsonResponse({'success': True,'stock':stock_qty,'price':product_price})
+    return JsonResponse({'success': True,'stock':stock_qty,'price':product_price,'price_list':customer.price_list.name})
 
 
 @login_required
@@ -118,25 +119,14 @@ def create_salereceipt(request):
                             unit_price_obj = None
                             if customer:
                                 customer_obj = Customer.objects.get(coname=customer)
-                                customer_region = customer_obj.region
-                                unit_price_obj = Final_Product_Price.objects.filter(
-                                    is_deleted=False,
-                                    # customer=customer,
-                                    product=product,
-                                    region=customer_region
-                                ).first()
-                            if not unit_price_obj and region:
-                                unit_price_obj = Final_Product_Price.objects.filter(
-                                    is_deleted=False,
-                                    region=region,
-                                    product=product
-                                ).first()
-
-                            if not unit_price_obj:
+                                unit_price =  product.get_price_for_customer(customer_obj)
+                                print(unit_price)
+                            
+                            if not unit_price:
                                 raise ValueError(f'No price defined for product {product.productname}')  
 
                             quantity = int(quantity)
-                            unit_price = float(unit_price_obj.price)
+                            unit_price = float(unit_price)
                             amount = unit_price * quantity
 
                             Sales_Receipt_Product.objects.create(
@@ -181,7 +171,7 @@ def edit_salereceipt(request, id):
                 salereceipt.save()
 
                 customer = form_salereceipt.cleaned_data.get('customer_name')
-                region = form_salereceipt.cleaned_data.get('region')
+                
 
                 # clear old products
                 salereceipt.sales_receipt_products.all().delete()
@@ -191,29 +181,20 @@ def edit_salereceipt(request, id):
                         product_id, quantity = product_data.split(':')
                         product = get_object_or_404(Final_Product, id=product_id)
 
-                        # Find price (customer first, then region)
+                        # Find price (customer)
                         unit_price_obj = None
                         if customer:
-                            unit_price_obj = Final_Product_Price.objects.filter(
-                                is_deleted=False,
-                                customer=customer,
-                                product=product
-                            ).first()
-                        if not unit_price_obj and region:
-                            unit_price_obj = Final_Product_Price.objects.filter(
-                                is_deleted=False,
-                                region=region,
-                                product=product
-                            ).first()
-
-                        if not unit_price_obj:
+                            customer_obj = Customer.objects.get(coname=customer)
+                            unit_price=product.get_price_for_customer(customer_obj)
+                        
+                        if not unit_price:
                             return JsonResponse({
                                 'success': False,
                                 'errors': f'No price defined for product {product.productname}'
                             })
 
                         quantity = int(quantity)
-                        unit_price = float(unit_price_obj.price)
+                        unit_price = float(unit_price)
                         amount = unit_price * quantity
 
                         Sales_Receipt_Product.objects.create(

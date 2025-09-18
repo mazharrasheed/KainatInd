@@ -87,10 +87,11 @@ Edit Customer Slae Receipt
                   <h6>Gujranwala</h6>
                   <h6>Cell: 0301-8742840</h6>
                 </div>
-                <div class="col-md-6" style=" ">
+                <div class="col-md-6" >
                   <p><strong>Date:</strong> {{ salereceipt.date_created|date:"Y-m-d H:i" }}</p>
                   <p>{{ form_salereceipt.customer_name|as_crispy_field }}</p>
-                  <p>{{ form_salereceipt.region|as_crispy_field }}</p>
+                  <h5 id="price_list"> </h5>
+                
                 </div>
               </div>
 
@@ -100,7 +101,7 @@ Edit Customer Slae Receipt
                     <td>{{ form.product|as_crispy_field }}</td>
                     <td id="in_stock">In Stock</td>
                     <td>{{ form.quantity|as_crispy_field }}</td>
-                    <td>Unit Price (Auto)</td>
+                    <td id="price">Unit Price (Auto)</td>
                     <td id="amount">Auto</td>
                     <td><button id="add-product" class="btn btn-primary" type="button"><i class="ti-plus me-1"></i> </button></td>
                   </tr>
@@ -150,11 +151,18 @@ $(document).ready(function () {
 
   // stock check
   $("#id_product").on("change", (e) => {
+    let customerId = $("#id_customer_name").val()
+      // Build query params
+  let params = {};
+  if (customerId) params.customer = customerId;
+ 
     $.ajax({
       url: `/get-stock-final-product/${e.target.value}`,
       method: "GET",
+      data: params,   // send customer/region (or both)
       success: function (data) {
         $("#in_stock").text(data.success ? data.stock : "N/A");
+        $("#price").text(data.success ? data.price : "N/A");
       }
     });
   });

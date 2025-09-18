@@ -84,44 +84,21 @@ class Final_Product(models.Model):
         def __str__(self):
             return f"{self.productname}"
 
-        def get_product_price(self, customer,region):
-            # Get the price for this product for a specific customer
-            unit_price = None
-            print('from models', customer, region)
-            try:
-                # Only convert to int if value exists
-                customer_id = int(customer) if customer else None
-                region_id = int(region) if region else None
-                if customer_id:
-                    customer_region_id=Customer.objects.get(is_deleted=False,id=customer_id).region.id
-                    obj = self.final_product_price.filter(region_id=customer_region_id).order_by('-id').first()
-                    if obj:
-                        unit_price = obj.price
-                if not unit_price and region_id:
-                    obj = self.final_product_price.filter(region_id=region_id).order_by('-id').first()
-                    if obj:
-                        unit_price = obj.price
-                print(unit_price)
-                return unit_price
-            except Exception as e:
-                print("Error in getting unit price:", e)
-                return None
-            except Product_Price.DoesNotExist:
-                return None
-
         def get_price_for_customer(self, customer):
-            # Get the price for this product for a specific customer
-            try:
-                return self.final_produt_price.get(customer=customer).price
-            except Product_Price.DoesNotExist:
+            """
+            Return the price of this product for the given customer based on their price list.
+            If no price is found, return None.
+            """
+            if not customer or not customer.price_list:
                 return None
-        def get_price_for_region(self, region):
-            # Get the price for this product for a specific customer
             try:
-                return self.final_product_price.get(region=region).price
-            except Product_Price.DoesNotExist:
+                return Price_List_Note_Products.objects.filter(
+                    price_list=customer.price_list,
+                    product=self
+                ).latest('id').price  # latest price if multiple exist
+            except Price_List_Note_Products.DoesNotExist:
                 return None
-
+            
         def get_current_stock(self):
             """Calculate the current stock of this product."""
             grn_total = Final_Product_Note_Product.objects.filter(product_id=self.id).aggregate(total=Sum('quantity'))['total'] or 0
@@ -142,32 +119,17 @@ class Final_Product(models.Model):
                 product.save()
             print(self.product_status)
 
-class Customer(models.Model):
-    coname=models.CharField(max_length=255)
-    region = models.ForeignKey(Region, on_delete=models.RESTRICT)
-    name=models.CharField(max_length=255)
-    address=models.CharField(max_length=255)
-    contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
-    is_deleted = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.coname
-        # return f"{self.coname.capitalize()} "
-
-    def get_customer_region(self):
-        if self.region:
-            return self.region.id
 
 class Price_List(models.Model):
     name = models.CharField(max_length=100)
     is_deleted=models.BooleanField(default=False)
-
     def __str__(self):
         return self.name
 
+
 class Price_List_Note(models.Model):
     products = models.ManyToManyField(Final_Product, through='Price_List_Note_Products')
-    price_list = models.ForeignKey(Price_List ,on_delete=models.CASCADE)
+    price_list = models.ForeignKey(Price_List ,on_delete=models.CASCADE,related_name='price_list_note')
     created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -178,7 +140,6 @@ class Price_List_Note_Products(models.Model):
     price = models.FloatField()
     class Meta:
         unique_together = ('price_list', 'product')
-    
 
 class Final_Product_Price(models.Model):
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='final_product_price')
@@ -187,7 +148,6 @@ class Final_Product_Price(models.Model):
     is_deleted=models.BooleanField(default=False)
     def __str__(self):
         return 'final_product_price'
-
 
 
 class Final_Product_Note(models.Model):
@@ -205,12 +165,28 @@ class Final_Product_Note_Product(models.Model):
         unique_together = ('final_product_note', 'product')
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
+    
+
+class Customer(models.Model):
+    coname=models.CharField(max_length=255)
+    region = models.ForeignKey(Region, on_delete=models.RESTRICT)
+    price_list=models.ForeignKey(Price_List,models.CASCADE)
+    name=models.CharField(max_length=255)
+    address=models.CharField(max_length=255 ,blank=True ,null=True)
+    city=models.CharField(max_length=255,blank=True ,null=True)
+    mobile=models.CharField(max_length=12,null=True,unique=True,blank=True)
+    credit_limit=models.PositiveIntegerField(null=True,unique=True,blank=True)
+    contact=models.CharField(max_length=12,null=True,unique=True,blank=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.coname
+        # return f"{self.coname.capitalize()} "
 
 class Sales_Receipt(models.Model):
     products = models.ManyToManyField(Final_Product, through='Sales_Receipt_Product')
     date_created = models.DateTimeField(auto_now_add=True)
     customer_name =  models.ForeignKey(Customer,on_delete=models.RESTRICT,null=True,blank=True)
-    region =  models.ForeignKey(Region,on_delete=models.RESTRICT,null=True,blank=True)
     customer =  models.CharField(max_length=220,null=True,blank=True)
     phone_number = models.CharField(max_length=12)
     created_by = models.ForeignKey(User, on_delete=models.RESTRICT,null=True)
