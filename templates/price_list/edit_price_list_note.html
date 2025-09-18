@@ -72,7 +72,7 @@
               </table>
               
               <button id="finalize-price-note" class="btn btn-success">Update Price List Note</button>
-              <a href="/list-price-list-notes/" class="btn btn-warning">Cancel</a>
+              <a href="/price_list_detail/{{price_list_id}}" class="btn btn-warning">Cancel</a>
             </form>          
           </div>
         </div>
@@ -83,82 +83,94 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  $(document).ready(function () {
-    let productList = [];
+ $(document).ready(function () {
+  // ✅ use only one array
+  let productList = [];
 
-    // Load existing products from Django context
-    let existingProducts = {{ existing_products|safe }};
-    existingProducts.forEach((item, index) => {
-      productList.push({ product: item.product__id, price: item.price });
+  // Load existing products from Django context into productList
+  let existingProducts = {{ existing_products|safe }};
+  existingProducts.forEach((item, index) => {
+    productList.push({ product: item.product__id, price: item.price });
 
-      let row = `<tr>
-                  <td>${item.product__productname}</td>
-                  <td>${item.price}</td>
-                  <td><button class="delete-product btn btn-danger" data-index="${index}">Delete</button></td>
-                </tr>`;
-      $('#product-list').append(row);
-    });
+    let row = `<tr>
+                <td>${item.product__productname}</td>
+                <td>${item.price}</td>
+                <td><button class="delete-product btn btn-danger" data-index="${index}">Delete</button></td>
+              </tr>`;
+    $('#product-list').append(row);
+  });
 
-    $('#add-product').on('click', function () {
-      const product = $('select[name="product"]').val();
-      const price = $('input[name="price"]').val();
+  // Add product
+  $('#add-product').on('click', function () {
+    const product = $('select[name="product"]').val();
+    const price = $('input[name="price"]').val();
 
-      if (!product) { alert('Please select a product.'); return; }
-      if (!price || price <= 0) { alert('Please enter a valid price.'); return; }
+    if (!product) { alert('Please select a product.'); return; }
+    if (!price || price <= 0) { alert('Please enter a valid price.'); return; }
 
-      const existingProduct = productList.find(item => item.product === product);
-      if (existingProduct) { alert('This product is already in the list.'); return; }
+    const existingProduct = productList.find(item => item.product == product);
+    if (existingProduct) { alert('This product is already in the list.'); return; }
 
-      productList.push({ product: product, price: price });
+    productList.push({ product: product, price: price });
 
-      const row = `<tr>
-                    <td>${$('select[name="product"] option:selected').text()}</td>
-                    <td>${price}</td>
-                    <td><button class="delete-product btn btn-danger" data-index="${productList.length - 1}">Delete</button></td>
-                   </tr>`;
-      $('#product-list').append(row);
-    });
+    const row = `<tr>
+                  <td>${$('select[name="product"] option:selected').text()}</td>
+                  <td>${price}</td>
+                  <td><button class="delete-product btn btn-danger" data-index="${productList.length - 1}">Delete</button></td>
+                 </tr>`;
+    $('#product-list').append(row);
+  });
 
-    $('#product-list').on('click', '.delete-product', function () {
-      const index = $(this).data('index');
-      productList.splice(index, 1);
-      $(this).closest('tr').remove();
-      $('.delete-product').each(function (i) { $(this).data('index', i); });
-    });
+  // Delete product
+  $('#product-list').on('click', '.delete-product', function () {
+    const index = $(this).data('index');
+    productList.splice(index, 1);   // ✅ remove from array
+    $(this).closest('tr').remove();
 
-    $('#finalize-price-note').on('click', function (event) {
-      event.preventDefault();
-
-      const price_list = $('select[name="price_list"]').val();
-      if (!price_list) { alert('Please select a Price List.'); return; }
-      if (productList.length === 0) { alert('Please add at least one product.'); return; }
-
-      const form = $('#price_note-form')[0];
-      const formData = new FormData(form);
-
-      productList.forEach(product => {
-        formData.append('products[]', `${product.product}:${product.price}`);
-      });
-
-      formData.append('finalize', true);
-
-      $.ajax({
-        url: form.action,
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        success: function (data) {
-          if (data.success) {
-            window.location.href = data.redirect_url;
-          } else {
-            alert('Failed to update price list note.');
-          }
-        },
-        error: function (error) { console.error('Error:', error); }
-      });
+    // re-index
+    $('.delete-product').each(function (i) {
+      $(this).data('index', i);
     });
   });
+
+  // Finalize submit
+  $('#finalize-price-note').on('click', function (event) {
+    event.preventDefault();
+
+    const price_list = $('select[name="price_list"]').val();
+    if (!price_list) { alert('Please select a Price List.'); return; }
+    if (productList.length === 0) { alert('Please add at least one product.'); return; }
+
+    const form = $('#price_note-form')[0];
+    const formData = new FormData(form);
+
+    productList.forEach(product => {
+      formData.append('products[]', `${product.product}:${product.price}`);
+    });
+
+    formData.append('finalize', true);
+
+    $.ajax({
+      url: form.action,
+      method: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      success: function (data) {
+        if (data.success) {
+          window.location.href = data.redirect_url;
+        } else {
+          alert('Failed to update price list note.');
+        }
+      },
+      error: function (error) {
+        alert('An error occurred. Check console.');
+        console.error('Error:', error);
+      }
+    });
+  });
+});
+
 </script>
 {% endblock body %}

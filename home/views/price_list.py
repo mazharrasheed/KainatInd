@@ -7,18 +7,16 @@ from collections import defaultdict
 @login_required
 @permission_required('home.add_project', login_url='/login/')
 def pricelist_detail(request,id):
-  print("5454534554")
-  mydata=None
+  print("pricelist_detail")
   price_list_note_id=None
   if request.user.is_authenticated:
     price_list=Price_List.objects.get(is_deleted=False,id=id)
-    print(price_list.id)
     if price_list:
         data=Price_List_Note_Products.objects.filter(price_list_id=price_list.id)
         price_list_note=Price_List_Note_Products.objects.filter(price_list_id=price_list.id).first()
         if price_list_note:
+        # requried for update price list not 
           price_list_note_id=price_list_note.price_list_note_id
-          print(type(price_list_note_id),"ffff")
     
     data={'mydata':data, 'price_list_note_id':price_list_note_id,
           'price_list':price_list ,'form':Final_Product_PriceForm()}
@@ -163,22 +161,24 @@ def create_price_list_note(request, id):
 def edit_final_product_price(request, id):
     if request.method == 'POST':
         # get raw string values
-        id = request.POST['pricelist']
+        pricelist_id = request.POST['pricelist']
         product_id = request.POST['product']
         price = request.POST['price']
         # convert to correct types
-        id = int(id)  
+        pricelist_id = int(pricelist_id)  
         product_id = int(product_id)  
         price = float(price)  
+        print(id,pricelist_id,product_id,price)
         # ✅ Update record instead of re-creating
         try:
-            data=Price_List_Note_Products.objects.get(price_list_note_id=id, product_id=product_id)
+            print("before data")
+            data=Price_List_Note_Products.objects.get(id=id, price_list_id=pricelist_id, product_id=product_id)
+            print(data,"fdfsdfds")
             data.price=price
             data.save()
         except:
            pass
-           
-        return redirect('pricelistdetail' , id=id )
+        return redirect('pricelistdetail' , id= pricelist_id )
 
 
 @login_required
@@ -193,7 +193,7 @@ def delete_final_product_price(request,id):
 @permission_required('home.change_price_list_note', login_url='/login/')
 
 def edit_price_list_note(request, id):
-    price_list=request.GET.get('price_list')
+    price_list_id=request.GET.get('price_list')
     note = get_object_or_404(Price_List_Note, pk=id)
 
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -222,7 +222,7 @@ def edit_price_list_note(request, id):
                         price=price
                     )
 
-                return JsonResponse({'success': True, 'redirect_url': f'/price_list_detail/{price_list}'})
+                return JsonResponse({'success': True, 'redirect_url': f'/price_list_detail/{price_list_id}'})
             else:
                 return JsonResponse({'success': False, 'errors': 'Invalid form data.'})
 
@@ -240,5 +240,6 @@ def edit_price_list_note(request, id):
         'form': form_product,
         'form_note': form_note,
         'note': note,
-        'existing_products': existing_products
+        'existing_products': existing_products,
+        'price_list_id': price_list_id
     })
