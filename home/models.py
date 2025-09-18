@@ -176,6 +176,9 @@ class Price_List_Note_Products(models.Model):
     price_list=models.ForeignKey(Price_List,on_delete=models.RESTRICT)
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
     price = models.FloatField()
+    class Meta:
+        unique_together = ('price_list', 'product')
+    
 
 class Final_Product_Price(models.Model):
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT, related_name='final_product_price')
@@ -198,6 +201,8 @@ class Final_Product_Note_Product(models.Model):
     final_product_note = models.ForeignKey(Final_Product_Note, on_delete=models.RESTRICT)
     product = models.ForeignKey(Final_Product, on_delete=models.RESTRICT)
     quantity = models.PositiveIntegerField()
+    class Meta:
+        unique_together = ('final_product_note', 'product')
     def __str__(self):
         return f"{self.product.productname} (Qty: {self.quantity})"
 

@@ -94,12 +94,16 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
 
+
+
+from django.db import IntegrityError, transaction
+
 @login_required
 @permission_required('home.add_price_list_note', login_url='/login/')
-
-
 def create_price_list_note(request, id):
-    price_list_id = int(request.GET.get('price_list', id))  # fallback to id
+    # fallback: get price_list from query or from url param
+    price_list_id = request.GET.get('price_list', id)
+    price_list_id = int(price_list_id)
     print("Selected PriceList ID:", price_list_id)
 
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -111,22 +115,39 @@ def create_price_list_note(request, id):
                 note = form_note.save(commit=False)
                 note.created_by = request.user
                 note.save()
-
+                errors = []
+               
                 for product_data in products:
-                    product_id, price = product_data.split(':')
-                    Price_List_Note_Products.objects.create(
-                        price_list_note=note,
-                        price_list=note.price_list,  # ✅ use saved note’s price_list
-                        product_id=product_id,
-                        price=price
-                    )
+                    try:
+                        product_id, price = product_data.split(':')
+                        with transaction.atomic():
+                            Price_List_Note_Products.objects.create(
+                                price_list_note=note,
+                                price_list=note.price_list,  # ✅ from saved note
+                                product_id=product_id,
+                                price=price
+                            )
+                            
+                    except IntegrityError:
+                        product=Final_Product.objects.get(id=product_id)
+                        errors.append(f"Product {product} already has a price in this price list.")
 
-                return JsonResponse({'success': True, 'redirect_url': '/list-price-list-notes/'})
+                if errors:
+                    # Rollback the whole note if some products fail
+                    note.delete()
+                    return JsonResponse({
+                        'success': False,
+                        'errors': errors
+                    }, status=400)
+
+                return JsonResponse({'success': True, 'redirect_url': f'/price_list_detail/{price_list_id}'})
+
             else:
-                return JsonResponse({'success': False, 'errors': 'Invalid form data or no products selected.'})
-    else:
-        form_product = PriceListNoteProductForm()
-        form_note = PriceListNoteForm(initial={'price_list': price_list_id})
+                return JsonResponse({'success': False, 'errors': 'Invalid form data or no products selected.'}, status=400)
+
+    # GET request → render form
+    form_product = PriceListNoteProductForm()
+    form_note = PriceListNoteForm(initial={'price_list': price_list_id})
 
     return render(request, 'price_list/create_price_list_note.html', {
         'form': form_product,
@@ -135,40 +156,44 @@ def create_price_list_note(request, id):
     })
 
 
+
 #  Edit Price in price list
 @login_required
-@permission_required('home.add_final_product_price', login_url='/login/')
+@permission_required('home.add_change_price_list_note_products', login_url='/login/')
 def edit_final_product_price(request, id):
     if request.method == 'POST':
         # get raw string values
         id = request.POST['pricelist']
         product_id = request.POST['product']
         price = request.POST['price']
-
         # convert to correct types
         id = int(id)  
         product_id = int(product_id)  
         price = float(price)  
-
-        print(type(id),'list')       # <class 'int'>
-        print(type(product_id),'pro') # <class 'int'>
-        print(type(price),'price')    # <class 'float'>
-
-        print(id, product_id, price)
-
         # ✅ Update record instead of re-creating
-        data=Price_List_Note_Products.objects.filter(price_list_note_id=id, product_id=product_id).update(
-            product_id=product_id,
-            price=price)
-        print(data)
+        try:
+            data=Price_List_Note_Products.objects.get(price_list_note_id=id, product_id=product_id)
+            data.price=price
+            data.save()
+        except:
+           pass
+           
         return redirect('pricelistdetail' , id=id )
-    
 
+
+@login_required
+@permission_required('home.add_delete_price_list_note_products', login_url='/login/')
+def delete_final_product_price(request,id):
+    mydata=Price_List_Note_Products.objects.get(price_list_note_id=id, product_id=id)
+    mydata.save()
+    messages.success(request,"Product Price Deleted Successfully from List !!")
+    return redirect('pricelistdetail' , id=id )
 
 @login_required
 @permission_required('home.change_price_list_note', login_url='/login/')
 
 def edit_price_list_note(request, id):
+    price_list=request.GET.get('price_list')
     note = get_object_or_404(Price_List_Note, pk=id)
 
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -176,10 +201,15 @@ def edit_price_list_note(request, id):
             form_note = PriceListNoteForm(request.POST, instance=note)
             products = request.POST.getlist('products[]')
 
-            if form_note.is_valid():
-                note = form_note.save(commit=False)
-                note.created_by = request.user
-                note.save()
+            note.created_by=request.user
+            note.save()
+
+            print(note.id,note.price_list)
+
+            if note:
+            #     note = form_note.save(commit=False)
+            #     note.created_by = request.user
+            #     note.save()
 
                 # Clear old products and re-add new ones
                 Price_List_Note_Products.objects.filter(price_list_note=note).delete()
@@ -192,7 +222,7 @@ def edit_price_list_note(request, id):
                         price=price
                     )
 
-                return JsonResponse({'success': True, 'redirect_url': '/list-price-list-notes/'})
+                return JsonResponse({'success': True, 'redirect_url': f'/price_list_detail/{price_list}'})
             else:
                 return JsonResponse({'success': False, 'errors': 'Invalid form data.'})
 
@@ -203,7 +233,7 @@ def edit_price_list_note(request, id):
         # Existing products for pre-load in JS
         existing_products = list(
             Price_List_Note_Products.objects.filter(price_list_note=note)
-            .values('id', 'product__id', 'product__name', 'price')
+            .values('id', 'product__id', 'product__productname', 'price')
         )
 
     return render(request, 'price_list/edit_price_list_note.html', {

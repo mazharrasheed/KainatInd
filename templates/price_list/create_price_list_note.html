@@ -202,9 +202,13 @@
             alert('Failed to finalize price list note.');
           }
         },
-        error: function (error) {
-          console.error('Error:', error);
+        error: function (xhr) {
+        let errorMsg = "An unexpected error occurred.";
+        if (xhr.responseJSON && xhr.responseJSON.errors) {
+            errorMsg = xhr.responseJSON.errors.join("\n");
         }
+        alert("Error: " + errorMsg);
+    }
       });
     });
   });
