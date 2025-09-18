@@ -117,12 +117,12 @@ Sales-List
                         </td>
                         
                         <td class="text-center">
-                          {% if perms.home.view_sale_receipt %}
+                          {% if perms.home.view_sales_receipt %}
                           <a class="btn btn-success text-light" href="{% url 'print_salereceipt' salereceipt.id %}">
                             <i class="ti-printer me-1"></i> </a>
                           {% endif %}
 
-                          {% if perms.home.change_sale_receipt %}
+                          {% if perms.home.change_sales_receipt %}
 
                           {% if salereceipt.make_transaction %}
 
@@ -133,20 +133,19 @@ Sales-List
                           {% url 'edit_salereceipt' salereceipt.id %}" {% endif %}> <i class="ti-pencil me-1"></i>
                           </button>
 
-
                           {% else %}
 
                           <a class="btn btn-warning text-light" href="{% if cash %}
                           {% url 'edit_cashsale_receipt' salereceipt.id %}
                           {% else %}
-                         
+                        
                           {% url 'edit_salereceipt' salereceipt.id %}"> <i class="ti-pencil me-1"></i> </a>
 
                           {% endif %}
                           {% endif %}
                           {% endif %}
 
-                          {% if perms.home.delete_sale_receipt %}
+                          {% if perms.home.delete_sales_receipt %}
                           {% if salereceipt.make_transaction %}
                           <button class="btn btn-danger" disabled data-salereceipt-id="{{ salereceipt.id }}">
                             <i class="ti-trash me-1"></i>

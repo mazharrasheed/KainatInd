@@ -72,12 +72,12 @@ Suppliers {% endblock title %}
                         <td class="text-center fs-6">{{ supplier.contact }}</td>
                         <td class="text-center fs-6">{{ supplier.adress|title }}</td>
                         <td class="text-center ">
-                          {% if perms.home.change_supplier %}
+                          {% if perms.home.change_suppliers %}
                           <a class="btn btn-warning fs-6 text-light" href="{% url 'editsupplier' supplier.id %}"><i class="ti-pencil-alt"></i>Edit</a>
                           {% else %}
                           <p>No Edit permission </p>
                           {% endif%}
-                          {% if perms.home.change_supplier %}
+                          {% if perms.home.change_suppliers %}
                           <button class="btn btn-danger fs-6  delete-supplier" data-supplier-id="{{ supplier.id }}">
                            <i class="ti-trash"></i> Delete
                           </button>

@@ -1,6 +1,6 @@
 
 from django.shortcuts import render, redirect
-from home.models import Product,Category
+from home.models import Product,Category,Final_Product
 from home.forms import ProductForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,permission_required
@@ -131,7 +131,7 @@ from ..models import Inventory
 
 def inventory(request):
     # Fetch all products
-    products = Product.objects.all()
+    products = Final_Product.objects.all()
     # Calculate stock for each product
     product_stock = []
     for product in products:

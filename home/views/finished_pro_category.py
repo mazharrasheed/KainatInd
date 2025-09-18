@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required,permission_required
 
 
 @login_required
-@permission_required('home.add_Finish_Product_Category', login_url='/login/')
+@permission_required('home.add_finish_product_category', login_url='/login/')
 def add_category(request):
   if request.user.is_authenticated:
     if request.method == 'POST':
@@ -27,7 +27,7 @@ def add_category(request):
   else:
     return redirect('signin')
 @login_required
-@permission_required('home.change_category', login_url='/login/')
+@permission_required('home.change_finish_product_category', login_url='/login/')
 def edit_category(request,id):
   if request.user.is_authenticated:
     data={}
@@ -50,7 +50,7 @@ def edit_category(request,id):
 
 
 @login_required
-@permission_required('home.view_product', login_url='/login/')
+@permission_required('home.delete_finish_product_category', login_url='/login/')
 
 def delete_category(request,id):
  

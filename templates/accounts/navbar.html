@@ -195,18 +195,6 @@
                   </li>
                   {% endif %}
 
-              {% if perms.home.view_project %}
-                  <li class=" {% if request.path == '/project/' %} color-info {% endif %} ">
-                    <a href="/project/">
-                      <span class="pcoded-micon"><i class="ti-layout-grid2"></i><b>D</b></span>
-                      <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
-                        <h5>Projects</h5>
-                      </span>
-                      <span class="pcoded-mcaret"></span>
-                    </a>
-                  </li>
-                  {% endif %}
-
               {% if perms.home.view_employee %}
                   <li class=" {% if request.path == '/employees/' %} color-info {% endif %} ">
                     <a href="/employees/">
@@ -225,6 +213,19 @@
                       <span class="pcoded-micon"><i class="ti-user"></i><b>D</b></span>
                       <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
                         <h5>Customers</h5>
+                      </span>
+                      <span class="pcoded-mcaret"></span>
+                    </a>
+                  </li>
+                  {% endif %}
+
+
+                    {% if perms.home.view_price_list %}
+                  <li class=" {% if request.path == '/list_product_price/' %} color-info {% endif %} ">
+                    <a href="/prices_list/">
+                      <span class="pcoded-micon"><i class="ti-view-list-alt"></i><b>D</b></span>
+                      <span class="pcoded-mtext fs-5" data-i18n="nav.dash.main">
+                        <h5>Price List</h5>
                       </span>
                       <span class="pcoded-mcaret"></span>
                     </a>

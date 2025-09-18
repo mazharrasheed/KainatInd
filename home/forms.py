@@ -746,6 +746,7 @@ class Employee_form(forms.ModelForm):
             # remove any default ('', '---------') before prepending "Select"
             cleaned_choices = [(val, label) for val, label in self.fields['type'].choices if val != '']
             self.fields['type'].choices = [('', 'Select')] + cleaned_choices
+            self.fields['order'].required=False
 
         if self.fields['designation'].choices:
             # remove any default ('', '---------') before prepending "Select"
@@ -806,6 +807,7 @@ class Customer_form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Customer_form, self).__init__(*args, **kwargs)
         self.fields['region'].empty_label = "Select Region"
+        self.fields['price_list'].empty_label = "Select Price List"
         placeholders = {
             'coname': 'Enter business name',
             'name': 'Enter contact person full name',
@@ -813,10 +815,11 @@ class Customer_form(forms.ModelForm):
             'contact': 'xxxx-xxxxxxx',
             'address':'Enter Address here'
         }
+
         for field_name, placeholder in placeholders.items():
             self.fields[field_name].widget.attrs.update({'placeholder': placeholder})
 
-         # Add 'fs-5' class to all fields' labels
+        # Add 'fs-5' class to all fields' labels
         for field_name in self.fields:
             self.fields[field_name].widget.attrs.update({'class': 'form-control'})  # Add class to widgets
             self.fields[field_name].label_tag = lambda label, tag=None, attrs=None, *args, **kwargs: f'<label class="fs-5" for="{self[field_name].id_for_label}">{label}</label>'
@@ -827,7 +830,7 @@ class Cheques_form(forms.ModelForm):
         model = Cheque
         fields = ['customer', 'cheque_number','cheque_amount','cheque_date','bank_name']
         labels={'customer':'Customer Name','cheuqe_Number':'Cheque Number','cheque_date':'Cheque Date','bank_name':'Bank Name/Party Name'
-             }
+            }
         widgets = {
             'cheque_date': forms.DateInput(attrs={'type': 'date'}),
         }
